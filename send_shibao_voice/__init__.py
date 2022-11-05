@@ -3,7 +3,6 @@ from utils.message_builder import record, image
 from services.log import logger
 from nonebot.typing import T_State
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, GroupMessageEvent
-from nonebot.rule import to_me
 import random
 import os
 
@@ -29,8 +28,9 @@ __plugin_cd_limit__ = {
     "cd": 3,
     "rst": "就...就算求我骂你也得慢慢来..."
 }
-
+#语音保存路径
 RECORD_PATH = os.path.join(os.path.dirname(__file__), "record")
+#图片保存路径
 IMAGE_PATH = os.path.join(os.path.dirname(__file__), "image")
 dg_voice = on_keyword({"识宝"}, priority=5, block=True)
 
@@ -38,6 +38,7 @@ dg_voice = on_keyword({"识宝"}, priority=5, block=True)
 @dg_voice.handle()
 async def _(bot: Bot, event: MessageEvent, state: T_State):
     if len(str((event.get_message()))) > 1:
+        #随机选择可选语音图片
         voice = random.choice(os.listdir(RECORD_PATH))
         result = record(voice, RECORD_PATH)
         await dg_voice.send(result)

@@ -2,18 +2,12 @@ from utils.utils import get_bot, scheduler
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import GroupMessageEvent, MessageEvent
 from services.log import logger
-from configs.path_config import IMAGE_PATH
 from utils.manager import group_manager
 from configs.config import Config
 from utils.message_builder import image
 import os
 import io
-from nonebot_plugin_htmlrender import (
-    text_to_pic,
-    md_to_pic,
-    template_to_pic,
-    get_new_page,
-)
+from nonebot_plugin_htmlrender import text_to_pic
 from PIL import Image
 
 __zx_plugin_name__ = "定时获取签到日志 [Superuser]"
@@ -46,8 +40,9 @@ Config.add_plugin_config(
 
 getSignLog = on_command("查日志", priority=15, block=True)
 
-
+#日志输出位置，通过getResult.sh输出
 LOG_PATH =  os.path.join(os.path.dirname(__file__), "log/sign.log")
+#日志转图片保存位置
 IMAGE_PATH =  os.path.join(os.path.dirname(__file__), "image")
 
 @getSignLog.handle()
@@ -55,11 +50,10 @@ async def _(event: MessageEvent,):
     logFile = open(LOG_PATH,'r')
     try:
         logStr = logFile.read()
-        pic = await text_to_pic(text=logStr)
+        pic = await text_to_pic(text=logStr)#日志转图片，依赖nonebot_plugin_htmlrender
         img = Image.open(io.BytesIO(pic))
         img.save(IMAGE_PATH + "/text2pic.png", format="PNG")
         await getSignLog.send(image('text2pic.png', IMAGE_PATH))
-
         logger.info(
             f"(USER {event.user_id}, GROUP {event.group_id if isinstance(event, GroupMessageEvent) else 'private'})"
             f" 发送签到日志"
@@ -68,7 +62,7 @@ async def _(event: MessageEvent,):
         logFile.close()
 
 
-@scheduler.scheduled_job(
+@scheduler.scheduled_job(#定时任务，每日6时6分
     "cron",
     hour=6,
     minute=6,
@@ -82,7 +76,7 @@ async def _():
         logFile = open(LOG_PATH,'r')
         try:
             logStr = logFile.read()
-            pic = await text_to_pic(text=logStr)
+            pic = await text_to_pic(text=logStr)#日志转图片，依赖nonebot_plugin_htmlrender
             img = Image.open(io.BytesIO(pic))
             img.save(IMAGE_PATH + "/text2pic.png", format="PNG")
             for gid in gl:

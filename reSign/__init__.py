@@ -1,9 +1,7 @@
-from utils.utils import get_bot, get_message_at
+from utils.utils import get_message_at
 from nonebot import on_command
-from nonebot.adapters.onebot.v11 import GROUP, GroupMessageEvent, MessageEvent, Message
+from nonebot.adapters.onebot.v11 import GroupMessageEvent, Message
 from services.log import logger
-from utils.manager import group_manager
-from configs.config import Config
 from services.db_context import db
 from utils.message_builder import at
 from configs.path_config import IMAGE_PATH

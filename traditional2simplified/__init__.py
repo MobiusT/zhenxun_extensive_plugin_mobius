@@ -1,6 +1,5 @@
-from utils.utils import get_bot, get_message_at
 from nonebot import on_command
-from nonebot.adapters.onebot.v11 import GROUP, MessageEvent, Message
+from nonebot.adapters.onebot.v11 import MessageEvent, Message
 from nonebot.params import CommandArg
 from services.log import logger
 from configs.config import Config
@@ -45,7 +44,9 @@ convert = on_command("簡體", aliases={"簡體字", "簡中"}, priority=15, blo
 
 @convert.handle()
 async def _(event: MessageEvent, arg: Message = CommandArg()):
+    #获取需要翻译的文字
     text=arg.extract_plain_text().strip()
+    #读取密钥配置
     app_id = Config.get_config("traditional2simplified", "APPID")
     app_secret = Config.get_config("traditional2simplified", "APPSECRET")
     if not app_id:
@@ -59,6 +60,7 @@ async def _(event: MessageEvent, arg: Message = CommandArg()):
         await convert.send(msg)
         return
     try:
+        #调用api
         rs = requests.get(f'https://www.mxnzp.com/api/convert/zh?content={text}&type=2&app_id={app_id}&app_secret={app_secret}')
         rs_obj = json.loads(rs.text)
         msg=rs_obj["data"]["convertContent"]
