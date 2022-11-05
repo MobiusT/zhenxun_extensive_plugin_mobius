@@ -3,7 +3,6 @@ from utils.message_builder import record, image
 from services.log import logger
 from nonebot.typing import T_State
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, GroupMessageEvent
-from nonebot.rule import to_me
 import random
 import os
 

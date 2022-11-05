@@ -1,6 +1,5 @@
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, Message
-from services.log import logger
 import re
 
 __zx_plugin_name__ = "echo"

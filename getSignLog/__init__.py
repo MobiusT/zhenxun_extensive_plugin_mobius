@@ -2,18 +2,12 @@ from utils.utils import get_bot, scheduler
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import GroupMessageEvent, MessageEvent
 from services.log import logger
-from configs.path_config import IMAGE_PATH
 from utils.manager import group_manager
 from configs.config import Config
 from utils.message_builder import image
 import os
 import io
-from nonebot_plugin_htmlrender import (
-    text_to_pic,
-    md_to_pic,
-    template_to_pic,
-    get_new_page,
-)
+from nonebot_plugin_htmlrender import text_to_pic
 from PIL import Image
 
 __zx_plugin_name__ = "定时获取签到日志 [Superuser]"

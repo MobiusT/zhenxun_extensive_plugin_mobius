@@ -1,6 +1,5 @@
-from utils.utils import get_bot, get_message_at
 from nonebot import on_command
-from nonebot.adapters.onebot.v11 import GROUP, MessageEvent, Message
+from nonebot.adapters.onebot.v11 import MessageEvent, Message
 from nonebot.params import CommandArg
 from services.log import logger
 from configs.config import Config
