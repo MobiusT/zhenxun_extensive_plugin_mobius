@@ -1,17 +1,15 @@
-from utils.utils import get_bot, get_message_at
 from nonebot import on_command
-from nonebot.adapters.onebot.v11 import GROUP, MessageEvent, Message
-from nonebot.params import CommandArg
+from nonebot.adapters.onebot.v11 import Bot, MessageEvent, Message
 from services.log import logger
-from configs.config import Config
-import requests, json
+import re
 
 __zx_plugin_name__ = "echo"
 __plugin_usage__ = """
 usage：
     echo
     指令：
-        echo+文字
+        echo+想要机器人发送的内容
+        回复想要机器人发送的消息+echo
 """.strip()
 __plugin_des__ = "echo"
 __plugin_cmd__ = ["echo"]
@@ -33,7 +31,13 @@ echo = on_command("echo", priority=5, block=True)
 
 
 @echo.handle()
-async def _(event: MessageEvent, arg: Message = CommandArg()):
-    text=arg.extract_plain_text().strip()
-    await echo.send(text)
+async def _(bot: Bot, event: MessageEvent):
+    reply= re.search(r"\[CQ:reply,id=(-?\d*)]", event.raw_message)
+    if reply: #存在回复消息
+        rplymsg = await bot.get_msg(message_id=int(reply.group(1)))
+        await echo.send(Message(rplymsg["message"]))
+        return
+    cmdStr=re.compile(r"^echo")#去掉命令后回复
+    msg=cmdStr.sub('', event.raw_message)
+    await echo.send(Message(msg))
     
