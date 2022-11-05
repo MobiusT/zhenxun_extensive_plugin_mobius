@@ -1,4 +1,4 @@
-getSignLog/log
-getSignLog/image
+getSignLog/log/sign.log*
+getSignLog/image/text2pic*
 **/__pycache__/
 
