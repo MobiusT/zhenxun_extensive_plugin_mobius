@@ -4,7 +4,7 @@
 from datetime import datetime, date
 from pydantic import BaseModel
 from typing import List, Optional, Union
-from ..config import CONFIG
+from configs.config import Config as ConfigMain
 
 
 class Config:
@@ -24,7 +24,7 @@ class Config:
         self.cookies = cookies
 
 
-config = Config(**CONFIG)
+config = Config(is_egenshin=False, egenshin_dir=None, cache_dir=None, username="", password="", cookies = [ConfigMain.get_config("bind_bh3", "COOKIE")])
 
 class _favorite_character(BaseModel):
     id: str

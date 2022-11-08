@@ -37,8 +37,6 @@ card = on_command(
     "崩坏三卡片", aliases={"崩三卡片", "崩3卡片", "崩坏3卡片"}, priority=5, block=True
 )
 
-IMAGE_PATH = os.path.join(os.path.dirname(__file__), "image")
-
 @card.handle()
 async def _(event: MessageEvent, arg: Message = CommandArg()):
     cookie = Config.get_config("bind_bh3", "COOKIE")
