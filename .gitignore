@@ -2,3 +2,5 @@ getSignLog/log/sign.log*
 getSignLog/image/text2pic*
 **/__pycache__/
 
+bh3/modules/data/uid.sqlite
+bh3/honkai_mys
