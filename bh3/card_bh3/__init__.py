@@ -49,7 +49,7 @@ async def _(event: MessageEvent, arg: Message = CommandArg()):
     try:
         role_id, region_id, qid = handle_id(event, arg)
     except InfoError as e:
-        await card.send(Message(f"{at(qid)}出错了：{str(e)}"))
+        await card.send(Message(f"{at(event.user_id)}出错了：{str(e)}"))
         return
 
     spider = GetInfo(server_id=region_id, role_id=role_id)
@@ -57,7 +57,7 @@ async def _(event: MessageEvent, arg: Message = CommandArg()):
     try:
         ind = await spider.part()
     except InfoError as e:
-        await card.send(Message(f"{at(qid)}出错了：{str(e)}"))
+        await card.send(Message(f"{at(event.user_id)}出错了：{str(e)}"))
         return
     await card.send(Message(f"{at(qid)}制图中，请稍后"))
 
