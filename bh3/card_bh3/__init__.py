@@ -33,7 +33,13 @@ __plugin_settings__ = {
     "limit_superuser": False,
     "cmd": ["崩坏三卡片", "崩三卡片", "崩3卡片", "崩坏3卡片"],
 }
-
+__plugin_block_limit__ = {
+    "rst": "[at]你正在查询！"
+}
+__plugin_cd_limit__ = {
+    "cd": 30,
+    "rst": "[at]你刚查过，别查了！"
+}
 card = on_command(
     "崩坏三卡片", aliases={"崩三卡片", "崩3卡片", "崩坏3卡片"}, priority=5, block=True
 )
