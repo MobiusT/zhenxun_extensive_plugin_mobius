@@ -192,7 +192,7 @@ class GetInfo(MysApi):
         # print(data)
         retcode = data["retcode"]
         if retcode == 1008:
-            raise InfoError("uid与服务器不匹配")
+            raise InfoError("uid与服务器不匹配，请重新绑定")
         elif retcode == 10102:
             raise InfoError(f"账号数据非公开,请前往米游社修改.")
         elif retcode == 10001:
