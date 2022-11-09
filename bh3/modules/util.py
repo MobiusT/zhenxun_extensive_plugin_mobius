@@ -43,19 +43,19 @@ class NotBindError(Exception):
 * 这个插件需要获取账号cookie, 外泄有可能导致您的账号遭受损失, 请注意相关事项再进行绑定, 造成一切损失由用户自行承担
 * 修改密码可以直接使其失效
 
-1. 打开米游社(https://bbs.mihoyo.com/ys/)
+1. 打开米游社(https://bbs.mihoyo.com/bh3/)
 2. 登录游戏账号
 3. F12打开控制台
 4. 输入以下代码运行
-javascript:(()=>{_=(n)=>{for(i in(r=document.cookie.split(";"))){var arr=r[i].split("=");if(arr[0].trim()==n)return arr[1];}};c=_("cookie_token")||alert('请重新登录');m=_("account_id")+","+c;c&&confirm('确定复制到剪切板?:'+m)&&copy(m)})();
+var cookie=document.cookie;var ask=confirm('Cookie:'+cookie+'\\n\\nDo you want to copy the cookie to the clipboard?');if(ask==true){copy(cookie);msg=cookie}else{msg='Cancel'}
 5. 复制提示的内容, 私聊发给机器人
 私聊格式为
-bhf绑定0000000,xxxxxxxxxxxx
+崩坏三ck 刚刚复制的cookie
+如：
+崩坏三ck cookie_token=xxxxxxxx;account_id=xxxxxxxxxxx
+如果看不懂cookie，可以全部复制
 
-其中0000000,xxxxxxxxxxxx是复制的内容
-
-如果你想查看另外个方法可以发送 bhf?2
-* 同时兼容手机端"""
+"""
     msg2 = """
 如果你是PC端,浏览器需要安装tampermonkey插件(https://www.tampermonkey.net/)
 如果你是手机端,可以下载油猴浏览器(http://www.youhouzi.cn/),并且在右下角打开菜单 [打开电脑模式] ,之后在[脚本管理]->[启用脚本功能]
