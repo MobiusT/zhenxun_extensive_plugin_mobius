@@ -1,26 +1,28 @@
 from nonebot import on_command
-from nonebot.adapters.onebot.v11 import MessageEvent, Message
+from nonebot.adapters.onebot.v11 import MessageEvent, Message, MessageSegment, GroupMessageEvent
 from services.log import logger
-from nonebot.params import CommandArg, Command
-from typing import Tuple
+from nonebot.params import CommandArg
 from ..modules.database import DB
-from ..modules.image_handle import (ItemTrans)
-from ..modules.query import InfoError
+from ..modules.image_handle import (ItemTrans, DrawFinance)
+from ..modules.query import InfoError, Finance
 import json, re, os
 
 
 __zx_plugin_name__ = "崩坏三绑定"
 __plugin_usage__ = """
 usage：
-    绑定崩坏三uid及服务器
+    绑定崩坏三uid及服务器等数据，cookie极为重要，请谨慎绑定
+    ** 如果对拥有者不熟悉，并不建议添加cookie **
+    该项目只会对cookie用于”崩坏三签到“，“崩坏三手账”
     指令：
         崩坏三绑定[uid][服务器]
         崩坏三服务器列表
-        崩坏三解绑
+        崩坏三ck[cookie]     # 该绑定请私聊
         示例：崩坏三绑定114514官服
+    如果不明白怎么获取cookie请输入“崩坏三ck”。
 """.strip()
 __plugin_des__ = "绑定自己的崩坏三uid等"
-__plugin_cmd__ = ["崩坏三绑定[uid][服务器]", "崩坏三服务器列表", "崩坏三解绑"]
+__plugin_cmd__ = ["崩坏三绑定[uid][服务器]", "崩坏三服务器列表", "崩坏三ck"]
 __plugin_type__ = ("崩坏三相关",)
 __plugin_version__ = 0.1
 __plugin_author__ = "mobius"
@@ -28,7 +30,7 @@ __plugin_settings__ = {
     "level": 5,
     "default_status": True,
     "limit_superuser": False,
-    "cmd": ["崩坏三绑定", "崩三绑定", "崩3绑定", "崩坏3绑定"],
+    "cmd": ["崩坏三绑定", "崩三绑定", "崩3绑定", "崩坏3绑定", "崩坏三服务器列表"],
 }
 __plugin_configs__ = {
     "COOKIE": {
@@ -42,9 +44,11 @@ bind = on_command(
     "崩坏三绑定", aliases={"崩三绑定", "崩3绑定", "崩坏3绑定", "崩坏三绑定uid", "崩三绑定uid", "崩3绑定uid", "崩坏3绑定uid"}, priority=5, block=True
 )
 server = on_command("崩坏三服务器列表", aliases={"崩三服务器列表", "崩3服务器列表", "崩坏3服务器列表", "崩坏三服务器", "崩三服务器", "崩3服务器", "崩坏3服务器"}, priority=5, block=True)
-
+ck = on_command(
+    "崩坏三ck", aliases={"崩三ck", "崩3ck", "崩坏3ck"}, priority=5, block=True
+)
 @bind.handle()
-async def _(event: MessageEvent, cmd: Tuple[str, ...] = Command(), arg: Message = CommandArg()):
+async def _(event: MessageEvent, arg: Message = CommandArg()):
     msg = arg.extract_plain_text().strip()
     qid=event.user_id #qq
     role_id = re.search(r"\d+", msg) #uid
@@ -87,3 +91,57 @@ async def _(event: MessageEvent):
         serverStr=f'{serverStr[:-2]}; \n'
     await server.send(serverStr)
 
+
+#崩坏三ck
+@ck.handle()
+async def _(event: MessageEvent, arg: Message = CommandArg()):
+    qid_db = DB("uid.sqlite", tablename="qid_uid")
+    qid = event.user_id
+    #验证uid绑定状态
+    try:
+        qid_db.get_uid_by_qid(qid)
+    except:
+        await ck.finish("请先绑定uid，如崩坏三绑定114514官服")
+
+    try:
+        #获取参数
+        msg = arg.extract_plain_text().strip()
+        if not msg:
+            await ck.finish("""私聊发送！！
+            1.以无痕模式打开浏览器（Edge请新建InPrivate窗口）
+            2.打开http://bbs.mihoyo.com/bh3/并登陆
+            3.按下F12，打开控制台，输入以下命令：
+            var cookie=document.cookie;var ask=confirm('Cookie:'+cookie+'\\n\\nDo you want to copy the cookie to the clipboard?');if(ask==true){copy(cookie);msg=cookie}else{msg='Cancel'}
+            5.私聊发送：崩坏三ck 刚刚复制的cookie""")
+        #检查是否是私聊
+        if isinstance(event, GroupMessageEvent):
+            await ck.finish("请立即撤回你的消息并私聊发送！")
+        #格式调整，删除首尾引号
+        if msg.startswith('"') or msg.startswith("'"):
+            msg = msg[1:]
+        if msg.endswith('"') or msg.endswith("'"):
+            msg = msg[:-1]
+        cookie = msg
+        # 用: 代替=, ,代替;
+        cookie = '{"' + cookie.replace('=', '": "').replace("; ", '","').replace(";", '","') + '"}'
+        print(cookie)
+        #反序列化
+        cookie_json = json.loads(cookie)
+        print(cookie_json)
+        if 'cookie_token' not in cookie_json:
+            await bind.finish("请发送正确完整的cookie（需包含cookie_token）！")
+        if 'account_id' not in cookie_json:
+            await bind.finish("请发送正确完整的cookie！（需包含account_id）")
+        spider = Finance(qid=qid, cookieraw=cookie_json["account_id"] + "," + cookie_json["cookie_token"])
+    except InfoError as e:
+        await ck.send(str(e))
+        return
+    try:
+        fi = await spider.get_finance()
+    except InfoError as e:
+        await ck.send(str(e))
+        return
+    fid = DrawFinance(**fi)
+    im = fid.draw()
+    img = MessageSegment.image(im)
+    await ck.finish("已绑定"+img, at_sender=True)
