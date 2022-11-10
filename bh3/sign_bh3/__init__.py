@@ -147,7 +147,7 @@ async def schedule_sign():
                 rs = autosign(hk3, qid)
                 #推送签到结果                
                 if bot:
-                    await bot.send_private_msg(user_id=int(qid), message=rs)
+                    await bot.send_private_msg(user_id=int(qid), message=Message(rs))
                     logger.info(rs)
                 cnt += 1
     return cnt, sum
