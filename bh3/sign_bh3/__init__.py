@@ -1,19 +1,16 @@
 from nonebot import on_command
-from utils.utils import scheduler
+from utils.utils import scheduler, get_bot
 from nonebot.adapters.onebot.v11 import MessageEvent, Message
 from nonebot.permission import SUPERUSER
 from services.log import logger
 from nonebot.params import CommandArg
 from ..modules.database import DB
-from ..modules.image_handle import (ItemTrans)
 from ..modules.mytyping import config, result
-from ..modules.query import InfoError
 from pathlib import Path
 from datetime import datetime
 from genshinhelper import Honkai3rd
 from genshinhelper.exceptions import GenshinHelperException
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-import json, re, os, asyncio
+import json, os, asyncio
 
 __zx_plugin_name__ = "崩坏三签到"
 __plugin_usage__ = """
@@ -22,7 +19,8 @@ usage：
     ** 如果对拥有者不熟悉，并不建议添加cookie **
     该项目只会对cookie用于”崩坏三签到“，“崩坏三手账”
     指令：
-        崩坏三签到
+        崩坏三签到       #签到并开启自动签到
+        崩坏三签到关闭   #关闭自动签到
     如果未绑定cookie请at真寻并输入 帮助崩坏三绑定。
 """.strip()
 __plugin_des__ = "崩坏三签到"
@@ -50,17 +48,19 @@ async def _(event: MessageEvent, arg: Message = CommandArg()):
     await sign.finish(f"执行完成，状态刷新{cnt}条，共{total}条", at_sender=True)
 
 
-@scheduler.scheduled_job("cron",hour=7,minute=0)
+@scheduler.scheduled_job("cron", hour=6, minute=5)
 async def task():
-    print(await schedule_sign())
+    cnt, total = await schedule_sign()
+    logger.info(f"崩坏三自动签到执行完成，状态刷新{cnt}条，共{total}条")
 
 
 @sign.handle()
 async def switch_autosign(event: MessageEvent, arg: Message = CommandArg()):
     """自动签到开关"""
-    qid = event.user_id #qq
+    qid = str(event.user_id) #qq
     cmd = arg.extract_plain_text().strip()
     sign_data = load_data()
+    #关闭签到
     if cmd in ["off", "关闭"]:
         if qid not in sign_data:
             await sign.finish("当前未开启崩坏三自动签到", at_sender=True)
@@ -74,6 +74,7 @@ async def switch_autosign(event: MessageEvent, arg: Message = CommandArg()):
     result = autosign(hk3, qid)
     await sign.finish(result, at_sender=True)
 
+#自动签到
 def autosign(hk3: Honkai3rd, qid: str):
     sign_data = load_data()
     today = datetime.today().day
@@ -92,14 +93,15 @@ def autosign(hk3: Honkai3rd, qid: str):
             ret += f"舰长,你今天已经签到过了哦👻"
         ret += "\n###############\n"
         ret_list += ret
+    #更新签到结果    
     sign_data.update({qid: {"date": today, "status": True, "result": ret_list}})
     save_data(sign_data)
     return ret_list.strip()
 
-
+#签到文件
 SIGN_PATH = Path(os.path.dirname(os.path.abspath(__file__))) / "sign_on.json"
 
-
+#反序列化签到文件
 def load_data():
     if not os.path.exists(SIGN_PATH):
         with open(SIGN_PATH, "w", encoding="utf8") as f:
@@ -109,12 +111,12 @@ def load_data():
         data: dict = json.load(f)
         return data
 
-
+#序列化签到文件
 def save_data(data):
     with open(SIGN_PATH, "w", encoding="utf8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
-
+#检查ck
 def check_cookie(qid: str):
     db = DB("uid.sqlite", tablename="qid_uid")
     cookie = db.get_cookie(qid)
@@ -129,16 +131,23 @@ def check_cookie(qid: str):
         return f"未找到崩坏3角色信息,请确认cookie对应账号是否已绑定崩坏3角色."
     return hk3
 
+#定时签到
 async def schedule_sign():
     today = datetime.today().day
     sign_data = load_data()
     cnt = 0
     sum = len(sign_data)
+    bot = get_bot()
     for qid in sign_data:
         await asyncio.sleep(5)
+        #判断今天是否未签到
         if sign_data[qid].get("date") != today or not sign_data[qid].get("status"):
             hk3 = check_cookie(qid)
             if isinstance(hk3, Honkai3rd):
-                hk3 = autosign(hk3, qid)
+                rs = autosign(hk3, qid)
+                #推送签到结果                
+                if bot:
+                    await bot.send_private_msg(user_id=int(qid), message=rs)
+                    logger.info(rs)
                 cnt += 1
     return cnt, sum
