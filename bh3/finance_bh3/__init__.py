@@ -26,7 +26,13 @@ __plugin_settings__ = {
     "limit_superuser": False,
     "cmd": ["崩坏三手账", "崩三手账", "崩3手账", "崩坏3手账"],
 }
-
+__plugin_block_limit__ = {
+    "rst": "[at]你正在查询！"
+}
+__plugin_cd_limit__ = {
+    "cd": 60,
+    "rst": "[at]你刚查过，别查了！"
+}
 finance = on_command("崩坏三手账", aliases={"崩三手账", "崩3手账", "崩坏3手账"}, priority=5, block=True)
 
 #崩坏三手账

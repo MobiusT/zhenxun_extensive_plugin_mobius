@@ -34,7 +34,13 @@ __plugin_settings__ = {
     "limit_superuser": False,
     "cmd": ["崩坏三女武神", "崩三女武神", "崩3女武神", "崩坏3女武神"],
 }
-
+__plugin_block_limit__ = {
+    "rst": "[at]你正在查询！"
+}
+__plugin_cd_limit__ = {
+    "cd": 60,
+    "rst": "[at]你刚查过，别查了！"
+}
 valkyrie = on_command(
     "崩坏三女武神", aliases={"崩三女武神", "崩3女武神", "崩坏3女武神"}, priority=5, block=True
 )
@@ -64,7 +70,7 @@ async def _(event: MessageEvent, arg: Message = CommandArg()):
     except InfoError as e:
         await valkyrie.send(Message(f"{at(event.user_id)}出错了：{str(e)}"))
         return
-    await valkyrie.send(Message(f"{at(event.user_id)}制图中，请稍后"))
+    await valkyrie.send(Message(f"{at(event.user_id)}制图中，女武神制图耗时较长，请耐心等待"))
     #绘图
     region_db.set_region(role_id, region_id)
     qid_db.set_uid_by_qid(qid, role_id)
