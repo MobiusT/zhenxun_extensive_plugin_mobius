@@ -72,6 +72,7 @@ async def switch_autosign(event: MessageEvent, arg: Message = CommandArg()):
     if isinstance(hk3, str):
         await sign.finish(hk3, at_sender=True)
     result = autosign(hk3, qid)
+    result += "\n自动签到已开启"
     await sign.finish(result, at_sender=True)
 
 #自动签到
