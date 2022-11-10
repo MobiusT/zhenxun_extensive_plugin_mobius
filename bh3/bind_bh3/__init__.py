@@ -2,6 +2,7 @@ from nonebot import on_command
 from nonebot.adapters.onebot.v11 import MessageEvent, Message, MessageSegment, GroupMessageEvent
 from services.log import logger
 from nonebot.params import CommandArg
+from utils.message_builder import image
 from ..modules.database import DB
 from ..modules.image_handle import (ItemTrans, DrawFinance)
 from ..modules.query import InfoError, Finance
@@ -19,6 +20,7 @@ usage：
         崩坏三服务器列表
         崩坏三ck[cookie]     # 该绑定请私聊
         示例：崩坏三绑定114514官服
+            崩坏三ckcookie_token=xxxxxxxxx;account_id=xxxxxxxxxxxxx
     如果不明白怎么获取cookie请输入“崩坏三ck”。
 """.strip()
 __plugin_des__ = "绑定自己的崩坏三uid等"
@@ -107,12 +109,18 @@ async def _(event: MessageEvent, arg: Message = CommandArg()):
         #获取参数
         msg = arg.extract_plain_text().strip()
         if not msg:
-            await ck.finish("""私聊发送！！
+            img=image('ck.png', os.path.join(os.path.dirname(__file__)))
+            await ck.finish(Message(img+"""私聊发送！！
             1.以无痕模式打开浏览器（Edge请新建InPrivate窗口）
             2.打开http://bbs.mihoyo.com/bh3/并登陆
-            3.按下F12，打开控制台，输入以下命令：
+            3.按下F12打开开发人员工具（不同浏览器按钮可能不同，可以设置里查找），打开控制台
+            4.在下方空白处输入以下命令：
             var cookie=document.cookie;var ask=confirm('Cookie:'+cookie+'\\n\\nDo you want to copy the cookie to the clipboard?');if(ask==true){copy(cookie);msg=cookie}else{msg='Cancel'}
-            5.私聊发送：崩坏三ck 刚刚复制的cookie""")
+            5.按确定复制或者手动复制均可
+            6.私聊发送：崩坏三ck 刚刚复制的cookie
+               如果遇到真寻不回复可能是ck里部分组合触发了黑名单词汇拦截，可以只复制需要的ck内容，如：崩坏三ckcookie_token=xxxxxxxxx;account_id=xxxxxxxxxxxxx
+            7.在不点击登出的情况下关闭无痕浏览器
+                    """))
         #检查是否是私聊
         if isinstance(event, GroupMessageEvent):
             await ck.finish("请立即撤回你的消息并私聊发送！")
