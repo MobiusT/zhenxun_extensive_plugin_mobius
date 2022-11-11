@@ -16,6 +16,7 @@ usage：
     指令：
         崩坏三猜语音：正常舰桥、战斗等语音
         崩坏三猜语音2/困难：简短的语气或拟声词
+        崩坏三猜语音答案
 """.strip()
 __plugin_des__ = "崩坏三猜语音"
 __plugin_cmd__ = ["崩坏三猜语音"]
@@ -31,7 +32,7 @@ __plugin_settings__ = {
 
 
 guess = on_regex(r"^(崩坏?|崩)(3|三)?猜语音", priority=5, permission=GROUP)
-answer = on_message(priority=5, permission=GROUP)
+answer = on_regex(r"^(崩坏?|崩)(3|三)?猜语音答案", priority=5, permission=GROUP)
 guessName = on_regex(r"^(崩坏?|崩)(3|三)?语音([^:]+)$", priority=5, permission=GROUP)
 addAnswer = on_regex(r"^(崩坏?|崩)(3|三)?语音新增答案(\w+)[:|：](\w+)$", priority=5, permission=SUPERUSER)
 undateVoice = on_regex(r"^更新(崩坏?|崩)(3|三)?语音列表$", priority=5, permission=SUPERUSER)
