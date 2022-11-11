@@ -1,14 +1,12 @@
 from utils.utils import get_bot, scheduler
 from nonebot import on_command
-from nonebot.adapters.onebot.v11 import GroupMessageEvent, MessageEvent
+from nonebot.adapters.onebot.v11 import GroupMessageEvent, MessageEvent, MessageSegment
 from services.log import logger
 from utils.manager import group_manager
 from configs.config import Config
-from utils.message_builder import image
-import os
-import io
 from nonebot_plugin_htmlrender import text_to_pic
-from PIL import Image
+import os
+
 
 __zx_plugin_name__ = "定时获取签到日志 [Superuser]"
 __plugin_usage__ = """
@@ -42,8 +40,6 @@ getSignLog = on_command("查日志", priority=15, block=True)
 
 #日志输出位置，通过getResult.sh输出
 LOG_PATH =  os.path.join(os.path.dirname(__file__), "log/sign.log")
-#日志转图片保存位置
-IMAGE_PATH =  os.path.join(os.path.dirname(__file__), "image")
 
 @getSignLog.handle()
 async def _(event: MessageEvent,):
@@ -51,9 +47,7 @@ async def _(event: MessageEvent,):
     try:
         logStr = logFile.read()
         pic = await text_to_pic(text=logStr)#日志转图片，依赖nonebot_plugin_htmlrender
-        img = Image.open(io.BytesIO(pic))
-        img.save(IMAGE_PATH + "/text2pic.png", format="PNG")
-        await getSignLog.send(image('text2pic.png', IMAGE_PATH))
+        await getSignLog.send(MessageSegment.image(pic))
         logger.info(
             f"(USER {event.user_id}, GROUP {event.group_id if isinstance(event, GroupMessageEvent) else 'private'})"
             f" 发送签到日志"
@@ -77,11 +71,9 @@ async def _():
         try:
             logStr = logFile.read()
             pic = await text_to_pic(text=logStr)#日志转图片，依赖nonebot_plugin_htmlrender
-            img = Image.open(io.BytesIO(pic))
-            img.save(IMAGE_PATH + "/text2pic.png", format="PNG")
             for gid in gl:
                 if await group_manager.check_group_task_status(gid, "getSignLog"):
-                    await bot.send_group_msg(group_id=int(gid), message=image('text2pic.png', IMAGE_PATH))                
+                    await bot.send_group_msg(group_id=int(gid), message=MessageSegment.image(pic))                
         finally:
             logFile.close()
 

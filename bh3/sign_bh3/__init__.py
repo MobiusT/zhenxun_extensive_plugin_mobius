@@ -1,15 +1,16 @@
 from nonebot import on_command
 from utils.utils import scheduler, get_bot
-from nonebot.adapters.onebot.v11 import MessageEvent, Message
+from nonebot.adapters.onebot.v11 import MessageEvent, Message, MessageSegment
 from nonebot.permission import SUPERUSER
 from services.log import logger
 from nonebot.params import CommandArg
 from ..modules.database import DB
-from ..modules.mytyping import config, result
+from ..modules.mytyping import result
 from pathlib import Path
 from datetime import datetime
 from genshinhelper import Honkai3rd
 from genshinhelper.exceptions import GenshinHelperException
+from nonebot_plugin_htmlrender import text_to_pic
 import json, os, asyncio
 
 __zx_plugin_name__ = "崩坏三签到"
@@ -73,7 +74,8 @@ async def switch_autosign(event: MessageEvent, arg: Message = CommandArg()):
         await sign.finish(hk3, at_sender=True)
     result = autosign(hk3, qid)
     result += "\n自动签到已开启"
-    await sign.finish(result, at_sender=True)
+    pic = await text_to_pic(text=result)
+    await sign.finish(MessageSegment.image(pic), at_sender=True)
 
 #自动签到
 def autosign(hk3: Honkai3rd, qid: str):
@@ -145,10 +147,11 @@ async def schedule_sign():
             hk3 = check_cookie(qid)
             if isinstance(hk3, Honkai3rd):
                 rs = autosign(hk3, qid)
+                pic = await text_to_pic(text=rs)
                 #推送签到结果      
                 bot = get_bot()    
                 logger.info(f'崩坏三自动签到 {qid}\n{rs}')      
                 if bot:
-                    await bot.send_private_msg(user_id=int(qid), message=rs)                    
+                    await bot.send_private_msg(user_id=int(qid), message=MessageSegment.image(pic))                    
                 cnt += 1
     return cnt, sum
