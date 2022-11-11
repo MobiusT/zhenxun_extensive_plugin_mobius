@@ -142,13 +142,11 @@ async def _(event: MessageEvent, arg: Message = CommandArg()):
             await bind.finish("请发送正确完整的cookie！（需包含account_id）")
         spider = Finance(qid=qid, cookieraw=cookie_json["account_id"] + "," + cookie_json["cookie_token"])
     except InfoError as e:
-        await ck.send(str(e))
-        return
+        await ck.finish(str(e))
     try:
         fi = await spider.get_finance()
     except InfoError as e:
-        await ck.send(str(e))
-        return
+        await ck.finish(str(e))
     fid = DrawFinance(**fi)
     im = fid.draw()
     img = MessageSegment.image(im)

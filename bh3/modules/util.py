@@ -43,17 +43,15 @@ class NotBindError(Exception):
 * 这个插件需要获取账号cookie, 外泄有可能导致您的账号遭受损失, 请注意相关事项再进行绑定, 造成一切损失由用户自行承担
 * 修改密码可以直接使其失效
 
-1. 打开米游社(https://bbs.mihoyo.com/bh3/)
-2. 登录游戏账号
-3. F12打开控制台
-4. 输入以下代码运行
-var cookie=document.cookie;var ask=confirm('Cookie:'+cookie+'\\n\\nDo you want to copy the cookie to the clipboard?');if(ask==true){copy(cookie);msg=cookie}else{msg='Cancel'}
-5. 复制提示的内容, 私聊发给机器人
-私聊格式为
-崩坏三ck 刚刚复制的cookie
-如：
-崩坏三ck cookie_token=xxxxxxxx;account_id=xxxxxxxxxxx
-如果看不懂cookie，可以全部复制
+    1.以无痕模式打开浏览器（Edge请新建InPrivate窗口）
+    2.打开http://bbs.mihoyo.com/bh3/并登陆
+    3.按下F12打开开发人员工具（不同浏览器按钮可能不同，可以设置里查找），打开控制台
+    4.在下方空白处输入以下命令：
+    var cookie=document.cookie;var ask=confirm('Cookie:'+cookie+'\\n\\nDo you want to copy the cookie to the clipboard?');if(ask==true){copy(cookie);msg=cookie}else{msg='Cancel'}
+    5.按确定复制或者手动复制均可
+    6.私聊发送：崩坏三ck 刚刚复制的cookie
+        如果遇到真寻不回复可能是ck里部分组合触发了黑名单词汇拦截，可以只复制需要的ck内容，如：崩坏三ckcookie_token=xxxxxxxxx;account_id=xxxxxxxxxxxxx
+    7.在不点击登出的情况下关闭无痕浏览器
 
 """
     msg2 = """

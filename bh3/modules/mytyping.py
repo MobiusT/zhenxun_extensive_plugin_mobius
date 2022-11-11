@@ -1,6 +1,5 @@
 # pylint: disable=no-name-in-module
 # pylint: disable=no-self-argument
-
 from datetime import datetime, date
 from pydantic import BaseModel
 from typing import List, Optional, Union
@@ -25,6 +24,8 @@ class Config:
 
 
 config = Config(is_egenshin=False, egenshin_dir=None, cache_dir=None, username="", password="", cookies = [ConfigMain.get_config("bind_bh3", "COOKIE")])
+COOKIES = config.cookies[0]
+
 
 class _favorite_character(BaseModel):
     id: str

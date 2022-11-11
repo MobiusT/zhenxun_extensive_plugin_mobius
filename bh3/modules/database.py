@@ -10,14 +10,14 @@ class DB(SqliteDict):
     cache_dir = Path(os.path.dirname(os.path.abspath(__file__))) / "data"
 
     def __init__(
-            self,
-            filename=None,
-            tablename="unnamed",
-            flag="c",
-            autocommit=True,
-            journal_mode="DELETE",
-            encode=json.dumps,
-            decode=json.loads,
+        self,
+        filename=None,
+        tablename="unnamed",
+        flag="c",
+        autocommit=True,
+        journal_mode="DELETE",
+        encode=json.dumps,
+        decode=json.loads,
     ) -> None:
         if not self.cache_dir.exists():
             self.cache_dir.mkdir(exist_ok=True, parents=True)

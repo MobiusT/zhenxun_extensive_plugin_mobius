@@ -50,8 +50,7 @@ async def _(event: MessageEvent, arg: Message = CommandArg()):
     #读取配置文件
     cookie = Config.get_config("bind_bh3", "COOKIE")
     if not cookie:
-        await valkyrie.send("需要真寻主人在config.yaml中配置cookie才能使用该功能")
-        return
+        await valkyrie.finish("需要真寻主人在config.yaml中配置cookie才能使用该功能")
 
     region_db = DB("uid.sqlite", tablename="uid_region")
     qid_db = DB("uid.sqlite", tablename="qid_uid")
@@ -59,8 +58,7 @@ async def _(event: MessageEvent, arg: Message = CommandArg()):
     try:
         role_id, region_id, qid = handle_id(event, arg)
     except InfoError as e:
-        await valkyrie.send(Message(f"{at(event.user_id)}出错了：{str(e)}"))
-        return
+        await valkyrie.finish(Message(f"{at(event.user_id)}出错了：{str(e)}"))
     #查询角色
     spider = GetInfo(server_id=region_id, role_id=role_id)
 
@@ -68,8 +66,7 @@ async def _(event: MessageEvent, arg: Message = CommandArg()):
         _, data = await spider.fetch(spider.valkyrie)
         _, index_data = await spider.fetch(spider.index)
     except InfoError as e:
-        await valkyrie.send(Message(f"{at(event.user_id)}出错了：{str(e)}"))
-        return
+        await valkyrie.finish(Message(f"{at(event.user_id)}出错了：{str(e)}"))
     await valkyrie.send(Message(f"{at(event.user_id)}制图中，女武神制图耗时较长，请耐心等待"))
     #绘图
     region_db.set_region(role_id, region_id)

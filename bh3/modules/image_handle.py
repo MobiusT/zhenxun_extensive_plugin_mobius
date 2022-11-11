@@ -1,6 +1,6 @@
 import base64
 import math
-import os, io
+import os
 import re
 from io import BytesIO
 from math import cos, pi, sin
@@ -13,7 +13,6 @@ from PIL import Image, ImageChops, ImageDraw, ImageFont, UnidentifiedImageError
 from .mytyping import (AbyssReport, BattleFieldReport, Character, FinanceInfo,
                        FullInfo, Index, _stigamata, _weapon)
 from .util import ItemTrans
-from services.log import logger
 
 
 class myDraw(ImageDraw.ImageDraw):
@@ -240,14 +239,13 @@ class myDraw(ImageDraw.ImageDraw):
             return bg
 
 
-def pic2bytes(im: Image.Image, quality: int = 100) -> bytes:
+def pic2b64(im: Image.Image, quality: int = 100) -> str:
     bio = BytesIO()
     im.save(bio, format="png", quality=quality)
-    return BytesIOToBytes(bio)
+    base64_str = base64.b64encode(bio.getvalue()).decode()
+    im.close()
+    return "base64://" + base64_str
 
-def BytesIOToBytes(_bytesIO: io.BytesIO) -> bytes:
-    _bytesIO.seek(0)
-    return _bytesIO.read()
 
 async def draw_abyss(aby: AbyssReport) -> Image.Image:
     if aby.type == "Greedy":
@@ -392,7 +390,7 @@ async def draw_battlefield(bfs: BattleFieldReport) -> List[Image.Image]:
 
 
 class DrawIndex(FullInfo):
-    async def draw_card(self, qid: str = None) -> bytes:
+    async def draw_card(self, qid: str = None) -> str:
         weekr = self.weeklyReport
         if self.index.preference.is_god_war_unlock:
             bg_path = os.path.join(
@@ -674,7 +672,8 @@ class DrawIndex(FullInfo):
                 dest=(398, 3678),
             )
         # bg.show()
-        return pic2bytes(bg, quality=100)
+
+        return pic2b64(bg, quality=100)
 
 
 def cal_dest(im: Image.Image, center: int) -> int:
@@ -684,7 +683,7 @@ def cal_dest(im: Image.Image, center: int) -> int:
 
 
 class DrawCharacter(Character):
-    async def draw_chara(self, index: Index, qid: str = None) -> bytes:
+    async def draw_chara(self, index: Index, qid: str = None) -> str:
         row_number = math.ceil(len(self.characters) / 3)
         card_chara = Image.new(
             mode="RGBA", size=(920, 20 + 320 * row_number), color=(236, 229, 216)
@@ -824,11 +823,11 @@ class DrawCharacter(Character):
             full_im.alpha_composite(img_header)
             full_im.alpha_composite(card_chara, (0, img_header.size[1]))
             # im.show()
-        return pic2bytes(full_im, 100)
+        return pic2b64(full_im, 100)
 
 
 class DrawFinance(FinanceInfo):
-    def draw(self) -> bytes:
+    def draw(self) -> str:
         with Image.open(
             os.path.join(os.path.dirname(__file__), "../assets/finance.png")
         ) as finance_bg:
@@ -937,4 +936,4 @@ class DrawFinance(FinanceInfo):
                 )
             ring = dr.ring(data)
             finance_bg.alpha_composite(ring, dest=(37, 861))
-            return pic2bytes(finance_bg)
+            return pic2b64(finance_bg)
