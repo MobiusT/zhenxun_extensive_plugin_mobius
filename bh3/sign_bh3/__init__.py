@@ -137,8 +137,7 @@ async def schedule_sign():
     today = datetime.today().day
     sign_data = load_data()
     cnt = 0
-    sum = len(sign_data)
-    bot = get_bot()
+    sum = len(sign_data)    
     for qid in sign_data:
         await asyncio.sleep(5)
         #判断今天是否未签到
@@ -146,7 +145,8 @@ async def schedule_sign():
             hk3 = check_cookie(qid)
             if isinstance(hk3, Honkai3rd):
                 rs = autosign(hk3, qid)
-                #推送签到结果                
+                #推送签到结果      
+                bot = get_bot()          
                 if bot:
                     await bot.send_private_msg(user_id=int(qid), message=Message(rs))
                     logger.info(rs)
