@@ -52,13 +52,11 @@ async def _(event: MessageEvent, arg: Message = CommandArg()):
     if not app_id:
         msg='未配置app_id, 请前往https://www.mxnzp.com/获取'
         logger.error(msg)
-        await convert.send(msg)
-        return
+        await convert.finish(msg)
     elif not app_secret:
         msg='未配置app_secret, 请前往https://www.mxnzp.com/获取'
         logger.error(msg)
-        await convert.send(msg)
-        return
+        await convert.finish(msg)
     try:
         #调用api
         rs = requests.get(f'https://www.mxnzp.com/api/convert/zh?content={text}&type=2&app_id={app_id}&app_secret={app_secret}')

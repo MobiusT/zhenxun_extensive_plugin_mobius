@@ -19,6 +19,11 @@ AttributeError: 'NoneType' object has no attribute 'encode'
 ```
 尝试执行pip install httpx 或 pip install nb-cli
 
+```
+签到图片中出现白色方块
+```
+下载[emoji字体](https://gitee.com/songboy/noto-emoji/tree/master/fonts),放到/usr/share/fonts下，加载字体后重启真寻
+
 ## 感谢
 [CRAZYShimakaze/genshin_role_info](https://github.com/CRAZYShimakaze/zhenxun_extensive_plugin/tree/main/genshin_role_info) : 源码参考（我是fw）
 [HibiKier/zhenxun_bot](https://github.com/HibiKier/zhenxun_bot) : 超好用的基于nonebot2的qq机器人
