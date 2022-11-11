@@ -146,9 +146,9 @@ async def schedule_sign():
             if isinstance(hk3, Honkai3rd):
                 rs = autosign(hk3, qid)
                 #推送签到结果      
-                bot = get_bot()          
+                bot = get_bot()    
+                logger.info(f'崩坏三自动签到 {qid}\n{rs}')      
                 if bot:
-                    await bot.send_private_msg(user_id=int(qid), message=Message(rs))
-                    logger.info(rs)
+                    await bot.send_private_msg(user_id=int(qid), message=rs)                    
                 cnt += 1
     return cnt, sum
