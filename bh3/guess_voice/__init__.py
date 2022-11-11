@@ -28,13 +28,7 @@ __plugin_settings__ = {
     "limit_superuser": False,
     "cmd": ["崩坏三猜语音", "崩三猜语音", "崩3猜语音", "崩坏3猜语音"],
 }
-__plugin_block_limit__ = {
-    "rst": "[at]你正在猜语音！"
-}
-__plugin_cd_limit__ = {
-    "cd": 30,
-    "rst": "[at]你刚猜过，别猜了！"
-}
+
 
 guess = on_regex(r"^(崩坏?|崩)(3|三)?猜语音", priority=5, permission=GROUP)
 answer = on_message(priority=5, permission=GROUP)
