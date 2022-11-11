@@ -33,8 +33,8 @@ __plugin_settings__ = {
 guess = on_regex(r"^(崩坏?|崩)(3|三)?猜语音", priority=5, permission=GROUP)
 answer = on_message(priority=5, permission=GROUP)
 guessName = on_regex(r"^(崩坏?|崩)(3|三)?语音([^:]+)$", priority=5, permission=GROUP)
-addAnswer = on_regex(r"^(崩坏?|崩)(3|三)?语音新增答案(\w+)[:|：](\w+)$", priority=5, permission=SUPERUSER, block=True)
-undateVoice = on_regex(r"^更新(崩坏?|崩)(3|三)?语音列表$", priority=5, permission=SUPERUSER, block=True)
+addAnswer = on_regex(r"^(崩坏?|崩)(3|三)?语音新增答案(\w+)[:|：](\w+)$", priority=5, permission=SUPERUSER)
+undateVoice = on_regex(r"^更新(崩坏?|崩)(3|三)?语音列表$", priority=5, permission=SUPERUSER)
 
 def split_voice_by_chara(v_list: list):
     """对语音列表进行分类"""
