@@ -43,7 +43,7 @@ signAll = on_command("崩坏三全部签到", permission=SUPERUSER, aliases={"�
 
 
 @signAll.handle()
-async def _(event: MessageEvent, arg: Message = CommandArg()):
+async def _():
     await sign.send("开始手动全部签到", at_sender=True)
     cnt, total = await schedule_sign()
     await sign.finish(f"执行完成，状态刷新{cnt}条，共{total}条", at_sender=True)

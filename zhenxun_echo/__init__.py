@@ -34,8 +34,7 @@ async def _(bot: Bot, event: MessageEvent):
     reply= re.search(r"\[CQ:reply,id=(-?\d*)]", event.raw_message)
     if reply: #存在回复消息
         rplymsg = await bot.get_msg(message_id=int(reply.group(1)))
-        await echo.send(Message(rplymsg["message"]))
-        return
+        await echo.finish(Message(rplymsg["message"]))
     cmdStr=re.compile(r"^echo")#去掉命令后回复
     msg=cmdStr.sub('', event.raw_message)
     await echo.send(Message(msg))
