@@ -116,13 +116,15 @@ async def _(event: MessageEvent, arg: Message = CommandArg()):
             3.按下F12打开开发人员工具（不同浏览器按钮可能不同，可以设置里查找），打开控制台
             4.在下方空白处输入以下命令：
             var cookie=document.cookie;var ask=confirm('Cookie:'+cookie+'\\n\\nDo you want to copy the cookie to the clipboard?');if(ask==true){copy(cookie);msg=cookie}else{msg='Cancel'}
-            5.按确定复制或者手动复制均可
-            6.私聊发送：崩坏三ck 刚刚复制的cookie
-               如果遇到真寻不回复可能是ck里部分组合触发了黑名单词汇拦截，可以只复制需要的ck内容，如：崩坏三ckcookie_token=xxxxxxxxx;account_id=xxxxxxxxxxxxx
+            5.按确定即可自动复制，手动复制也可以
+            6.私聊真寻发送：崩坏三ck 刚刚复制的cookie
+               如果遇到真寻不回复可能是ck里部分字符组合触发了真寻黑名单词汇拦截，可以只复制需要的ck内容，例：崩坏三ck cookie_token=xxxxxxxxx;account_id=xxxxxxxxxxxxx
             7.在不点击登出的情况下关闭无痕浏览器
                     """))
         #检查是否是私聊
         if isinstance(event, GroupMessageEvent):
+            if msg is "cookie_token=xxxxxxxxx;account_id=xxxxxxxxxxxxx":
+                await ck.finish("这是绑定崩坏三cookie的实例，实际绑定的时候务必私聊！务必私聊！务必私聊！")
             await ck.finish("请立即撤回你的消息并私聊发送！")
         #格式调整，删除首尾引号
         if msg.startswith('"') or msg.startswith("'"):
