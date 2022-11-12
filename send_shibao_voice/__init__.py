@@ -32,7 +32,7 @@ __plugin_cd_limit__ = {
 RECORD_PATH = os.path.join(os.path.dirname(__file__), "record")
 #图片保存路径
 IMAGE_PATH = os.path.join(os.path.dirname(__file__), "image")
-dg_voice = on_keyword({"识宝"}, priority=5, block=True)
+dg_voice = on_keyword({"识宝"}, priority=5)
 
 
 @dg_voice.handle()
