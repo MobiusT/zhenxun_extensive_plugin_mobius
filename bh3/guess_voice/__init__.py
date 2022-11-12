@@ -2,7 +2,7 @@ import json
 import os
 import random
 import re
-from nonebot import on_regex, on_message
+from nonebot import on_command
 from nonebot.permission import SUPERUSER
 from nonebot.adapters.onebot.v11 import MessageSegment, MessageEvent, Message, GroupMessageEvent, GROUP
 from nonebot.params import CommandArg
@@ -31,12 +31,11 @@ __plugin_settings__ = {
 }
 
 
-guess = on_regex(r"^(崩坏?|崩)(3|三)?猜语音", priority=5, permission=GROUP)
-answer = on_regex(r"^(崩坏?|崩)(3|三)?猜语音答案", priority=5, permission=GROUP)
-guessName = on_regex(r"^(崩坏?|崩)(3|三)?语音([^:]+)$", priority=5, permission=GROUP)
-addAnswer = on_regex(r"^(崩坏?|崩)(3|三)?语音新增答案(\w+)[:|：](\w+)$", priority=5, permission=SUPERUSER)
-undateVoice = on_regex(r"^更新(崩坏?|崩)(3|三)?语音列表$", priority=5, permission=SUPERUSER)
-
+guess = on_command("崩坏三猜语音", aliases={"崩三猜语音", "崩3猜语音", "崩坏3猜语音", "猜语音"}, priority=5, permission=GROUP, block=True)
+answer = on_command("崩坏三猜语音答案", aliases={"崩三猜语音答案", "崩3猜语音答案", "崩坏3猜语音答案", "猜语音答案"}, priority=6, permission=GROUP, block=True)
+guessName = on_command("崩坏三语音", aliases={"崩三语音", "崩3语音", "崩坏3语音"}, priority=6, permission=GROUP, block=True)
+addAnswer = on_command("崩坏三语音新增答案", aliases={"崩三语音新增答案", "崩3语音新增答案", "崩坏3语音新增答案"}, priority=5, permission=SUPERUSER, block=True)
+undateVoice = on_command("更新崩坏三语音列表", aliases={"更新崩三语音列表", "更新崩3语音列表", "更新崩坏3语音列表"}, priority=5, permission=SUPERUSER, block=True)
 def split_voice_by_chara(v_list: list):
     """对语音列表进行分类"""
     ret = {
@@ -95,9 +94,8 @@ async def check_answer(event: GroupMessageEvent, arg: Message = CommandArg()):
 
 
 @guessName.handle()
-async def send_voice(event: GroupMessageEvent):
-    msg = event["match"].group(3)
-    uid = event.user_id
+async def send_voice(event: GroupMessageEvent, arg: Message = CommandArg()):
+    msg = arg.extract_plain_text().strip()
     a_list = GameSession.__load__("answer.json")
     assert isinstance(a_list, dict)
     for k, v in a_list.items():
@@ -105,17 +103,23 @@ async def send_voice(event: GroupMessageEvent):
             try:
                 v_list = GameSession.__load__()["normal"][k]
             except KeyError:
-                await guessName.finish(f"语音列表未生成或有错误，请先发送‘更新崩坏3语音列表’来更新")
+                await guessName.finish(f"语音列表未生成或有错误，请先发送‘更新崩坏三语音列表’来更新")
             voice = random.choice(v_list)
-            voice_path = f"file:///{os.path.join(os.path.dirname(__file__),'../assets/record',voice['voice_path'])}"
+            voice_path = f"file:///{os.path.join(os.path.dirname(os.path.dirname(__file__)),'assets/record',voice['voice_path'])}"
             await guessName.finish(MessageSegment.record(voice_path))
     await guessName.send(f"没找到【{msg}】的语音，请检查输入。", at_sender=True)
 
 
 @addAnswer.handle()
-async def add_answer(event: MessageEvent):
-    origin = event["match"].group(3)
-    new = event["match"].group(4)
+async def add_answer(event: MessageEvent, arg: Message = CommandArg()):
+    msg=arg.extract_plain_text().strip()
+    if not msg:
+        await addAnswer.finish(f"未输入答案", at_sender=True)
+    msgArr=msg.replace("：", ":").split(":")
+    if len(msgArr) != 2:
+        await addAnswer.finish(f"答案有误，输入参考：崩坏三语音新增答案丽塔(标准答案):缭乱星棘(别称)", at_sender=True)
+    origin = msgArr[0].strip()
+    new = msgArr[1].strip()
     data = GameSession.__load__("answer.json")
     if origin not in data:
         await addAnswer.finish(f"{origin}不存在。")
@@ -130,7 +134,7 @@ async def add_answer(event: MessageEvent):
 
 
 @undateVoice.handle()
-async def update_voice_list(event: MessageEvent, arg: Message = CommandArg()):
+async def update_voice_list():
     data = gen_voice_list()
     data_dict = split_voice_by_chara(data)
     with open(
