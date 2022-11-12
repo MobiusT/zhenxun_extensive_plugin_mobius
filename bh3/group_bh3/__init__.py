@@ -66,8 +66,11 @@ async def _(event: MessageEvent, reg_group: Tuple[Any, ...] = RegexGroup()):
                 groupList.append(groupJsonName)
         else:
             await group.finish("未找到{groupName}中的{name},请联系管理员添加配置")
-
-    arg = str(MessageSegment(reg_group[2]))
+    ats =  get_message_at(event.json())
+    if len(ats)==0 :
+        arg = str(reg_group[2])
+    else:
+        arg=""  
     region_db = DB("uid.sqlite", tablename="uid_region")
     qid_db = DB("uid.sqlite", tablename="qid_uid")
     #获取绑定的角色信息
