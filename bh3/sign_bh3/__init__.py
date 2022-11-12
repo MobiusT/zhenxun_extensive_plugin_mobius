@@ -124,7 +124,7 @@ def check_cookie(qid: str):
     db = DB("uid.sqlite", tablename="qid_uid")
     cookie = db.get_cookie(qid)
     if not cookie:
-        return f"自动签到需要绑定cookie,at真寻并发送'帮助崩坏三绑定'查看如何绑定."
+        return f"自动签到需要绑定cookie,发送'崩坏三ck'查看如何绑定."
     hk3 = Honkai3rd(cookie=cookie)
     try:
         role_info = hk3.roles_info

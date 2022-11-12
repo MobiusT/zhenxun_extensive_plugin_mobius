@@ -5,7 +5,7 @@
 自学的python，写的可能不是很好（估计有很多bug），见谅
 
 ## 列表
-- [崩坏三](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/bh3)(移植自云崽[崩坏三插件](https://github.com/py-plugin-apps/honkai_mys)
+- [崩坏三](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/bh3)移植自[崩坏三插件](https://github.com/py-plugin-apps/honkai_mys)猜语音功能暂不可用，可以手动删除对应文件夹
 - [签退](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/reSign)
 - [识宝骂我](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/send_shibao_voice)(改自真寻原版插件骂我)
 - [繁中转简中](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/traditional2simplified)
