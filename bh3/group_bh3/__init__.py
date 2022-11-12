@@ -1,9 +1,8 @@
 from nonebot import on_regex
 from nonebot.adapters.onebot.v11 import MessageEvent, Message, MessageSegment
 from services.log import logger
-from nonebot.params import CommandArg
 from utils.message_builder import at
-from utils.utils import get_message_at, get_user_avatar, get_message_text
+from utils.utils import get_message_at, get_message_text
 from configs.config import Config
 from ..modules.database import DB
 from ..modules.image_handle import DrawGroupCharacter

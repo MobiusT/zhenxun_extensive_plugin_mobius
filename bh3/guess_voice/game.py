@@ -12,7 +12,7 @@ from nonebot.adapters.onebot.v11 import MessageSegment
 # from apscheduler.schedulers.asyncio import AsyncIOScheduler
 # scheduler = AsyncIOScheduler()
 game_record = {}
-bot = get_bot()
+
 
 
 class GameSession:
@@ -38,7 +38,7 @@ class GameSession:
         self.job_id = f"{self.group_id}_bh3_guess_voice"
         self.voice_list = self.__load__()
 
-    async def start(self, duration: int = 30, difficulty: str = "normal"):
+    async def start(self, duration: int = 30, difficulty: str = "normal")-> MessageSegment or str:
         """difficulty:  normal|hard"""
         if self.is_start:
             return f"游戏正在进行中"
@@ -62,12 +62,14 @@ class GameSession:
             coalesce=True,
             max_instances=1,
         )
-        record_path = f"file:///{os.path.join(os.path.dirname(__file__),'../assets/record',self.voice['voice_path'])}"
+        record_path = f"file:///{os.path.join(os.path.dirname(os.path.dirname(__file__)),'assets/record',self.voice['voice_path'])}"
         print(self.answer)
+        bot = get_bot()
         await bot.send_group_msg(
             group_id=self.group_id, message=f"即将发送一段崩坏3语音，将在{duration}后公布答案。"
         )
-        return f"{MessageSegment.record(record_path)}"
+        rs = MessageSegment.record(record_path)
+        return rs
 
     @property
     def answer(self) -> list:
@@ -88,6 +90,7 @@ class GameSession:
         else:
             ret_msg = f"回答正确的人：{MessageSegment.at(ok_player)}"
         ret_msg = f"正确答案是：{self.chara}\n{ret_msg}"
+        bot = get_bot()
         await bot.send_group_msg(group_id=self.group_id, message=ret_msg)
         game_record[self.group_id] = {}
 
