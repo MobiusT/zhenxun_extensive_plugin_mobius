@@ -10,6 +10,9 @@ import re
 def handle_id(event: MessageEvent, arg: Message = CommandArg()):
     #获取参数
     msg = arg.extract_plain_text().strip()
+    return handle_id_str(event, msg)
+
+def handle_id_str(event: MessageEvent, msg: str):
     #获取at
     ats =  get_message_at(event.json())
     if len(ats)==0 :
@@ -59,4 +62,4 @@ def handle_id(event: MessageEvent, arg: Message = CommandArg()):
             )  # 输入的服务器与数据库中保存的不一致，可手动delete该条数据
 
     role_id = role_id if isinstance(role_id, str) else role_id.group()
-    return role_id, region_id, qid
+    return role_id, region_id, qid   
