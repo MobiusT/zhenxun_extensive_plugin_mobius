@@ -82,7 +82,6 @@ async def _(event: MessageEvent, reg_group: Tuple[Any, ...] = RegexGroup()):
         _, index_data = await spider.fetch(spider.index)
     except InfoError as e:
         await group.finish(Message(f"{at(event.user_id)}出错了：{str(e)}"))
-    await group.send(Message(f"{at(event.user_id)}制图中，请稍后"))
     #绘图
     region_db.set_region(role_id, region_id)
     qid_db.set_uid_by_qid(qid, role_id)
