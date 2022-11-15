@@ -36,7 +36,7 @@ __plugin_configs__ = {
         "default_value": ''
     },
 }
-convert = on_command("簡體", aliases={"簡體字", "簡中"}, priority=15, block=True)
+convert = on_command("簡體", aliases={"簡體字", "簡中", "簡"}, priority=15, block=True)
 
 #消息拦截
 @event_preprocessor
@@ -48,7 +48,7 @@ async def handle(event: MessageEvent):
     if not msg:
         return
     try:
-        cmdStr=re.compile(r"^(簡體|簡體字|簡中)")#去掉命令头
+        cmdStr=re.compile(r"^(簡體字|簡體|簡中|簡)")#去掉命令头
         if cmdStr.search(msg):
             msg=cmdStr.sub('', msg)  
             
