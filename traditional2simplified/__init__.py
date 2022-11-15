@@ -1,9 +1,10 @@
 from nonebot import on_command
-from nonebot.adapters.onebot.v11 import MessageEvent, Message
+from nonebot.adapters.onebot.v11 import MessageEvent, Message, GroupMessageEvent
+from nonebot.message import event_preprocessor
 from nonebot.params import CommandArg
 from services.log import logger
 from configs.config import Config
-import requests, json, time, hashlib, httpx
+import re, time, hashlib, httpx
 
 __zx_plugin_name__ = "繁中转简中"
 __plugin_usage__ = """
@@ -37,6 +38,44 @@ __plugin_configs__ = {
 }
 convert = on_command("簡體", aliases={"簡體字", "簡中"}, priority=15, block=True)
 
+#消息拦截
+@event_preprocessor
+async def handle(event: MessageEvent):
+    msgs = event.get_message()
+    if len(msgs) < 1 or msgs[0].type != "text":
+        return
+    msg = str(msgs[0]).lstrip()
+    if not msg:
+        return
+    try:
+        cmdStr=re.compile(r"^(簡體|簡體字|簡中)")#去掉命令头
+        msg=cmdStr.sub('', msg)  
+        #读取密钥配置
+        app_id = Config.get_config("traditional2simplified", "APPID")
+        app_secret = Config.get_config("traditional2simplified", "APPSECRET")
+        if not app_id:
+            logger.error("未配置app_id, 请前往http://api.fanyi.baidu.com/获取")
+            return
+        elif not app_secret:
+            logger.error("未配置app_secret, 请前往http://api.fanyi.baidu.com/获取")
+            return
+        try:
+            #调用api
+            msg = await translate(msg, app_id, app_secret, "cht", "zh")      
+            event.message[0].data["text"] = msg
+        except Exception as e:
+            logger.error(f'转换出错{type(e)}：{e}')
+            return      
+            
+    except:
+        return
+
+
+def get_id(event: MessageEvent) -> str:
+    if isinstance(event, GroupMessageEvent):
+        return "group_" + str(event.group_id)
+    else:
+        return "private_" + str(event.user_id)
 
 @convert.handle()
 async def _(event: MessageEvent, arg: Message = CommandArg()):
