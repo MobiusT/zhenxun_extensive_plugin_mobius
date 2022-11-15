@@ -49,24 +49,25 @@ async def handle(event: MessageEvent):
         return
     try:
         cmdStr=re.compile(r"^(簡體|簡體字|簡中)")#去掉命令头
-        msg=cmdStr.sub('', msg)  
-        #读取密钥配置
-        app_id = Config.get_config("traditional2simplified", "APPID")
-        app_secret = Config.get_config("traditional2simplified", "APPSECRET")
-        if not app_id:
-            logger.error("未配置app_id, 请前往http://api.fanyi.baidu.com/获取")
-            return
-        elif not app_secret:
-            logger.error("未配置app_secret, 请前往http://api.fanyi.baidu.com/获取")
-            return
-        try:
-            #调用api
-            msg = await translate(msg, app_id, app_secret, "cht", "zh")      
-            event.message[0].data["text"] = msg
-        except Exception as e:
-            logger.error(f'转换出错{type(e)}：{e}')
-            return      
+        if cmdStr.search(msg):
+            msg=cmdStr.sub('', msg)  
             
+            #读取密钥配置
+            app_id = Config.get_config("traditional2simplified", "APPID")
+            app_secret = Config.get_config("traditional2simplified", "APPSECRET")
+            if not app_id:
+                logger.error("未配置app_id, 请前往http://api.fanyi.baidu.com/获取")
+                return
+            elif not app_secret:
+                logger.error("未配置app_secret, 请前往http://api.fanyi.baidu.com/获取")
+                return
+            try:
+                #调用api
+                msg = await translate(msg, app_id, app_secret, "cht", "zh")      
+                event.message[0].data["text"] = msg
+            except Exception as e:
+                logger.error(f'转换出错{type(e)}：{e}')
+                return
     except:
         return
 
