@@ -36,7 +36,7 @@ __plugin_configs__ = {
         "default_value": ''
     },
 }
-convert = on_command("簡體", aliases={"簡體字", "簡中"}, priority=15, block=True)
+convert = on_command("簡體", aliases={"簡體字", "簡中", "簡"}, priority=15, block=True)
 
 #消息拦截
 @event_preprocessor
