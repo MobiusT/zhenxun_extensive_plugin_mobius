@@ -17,7 +17,9 @@ usage：
         崩坏三猜语音：正常舰桥、战斗等语音
         崩坏三猜语音2/困难：简短的语气或拟声词
         崩坏三猜语音答案
-        崩坏三语音xx：随机发送指定女武神一段语音
+        崩坏三语音[name]：随机发送指定女武神一段语音
+        崩坏三语音列表[name]：查看指定女武神所有语音
+        崩坏三语音[name][id]：发送指定女武神的指定语音
 """.strip()
 __plugin_des__ = "崩坏三猜语音"
 __plugin_cmd__ = ["崩坏三猜语音"]
@@ -111,13 +113,25 @@ async def send_voice(event: GroupMessageEvent, arg: Message = CommandArg()):
                     await guessName.finish(f"语音列表未生成或有错误，请先发送‘更新崩坏三语音列表’来更新")
                 #voice = random.choice(v_list)
                 #voice_path = f"file:///{os.path.join(os.path.dirname(os.path.dirname(__file__)),'assets/record',voice['voice_path'])}"
-                pic = await text_to_pic(text=v_list)
+                text=""
+                for i in range(len(v_list)):
+                    text+=f'{i}   {(v_list[i]["voice_name"])[:-4]}\n'
+                pic = await text_to_pic(text=text)
                 await guessName.finish(MessageSegment.image(pic))
         await guessName.send(f"没找到【{msg}】的语音，请检查输入。", at_sender=True)
     elif idCmd.search(msg):
         id=idCmd.search(msg)
-        name=idCmd.sub('', msg)  
-        await guessName.finish(f'name:{name.group()},id:{id.group()}')
+        name=idCmd.sub('', msg)
+        for k, v in a_list.items():
+            if name in v:
+                try:
+                    v_list = GameSession.__load__()["normal"][k]
+                    voice = v_list[int(id.group())]
+                except KeyError:
+                    await guessName.finish(f"语音列表未生成或有错误，请先发送‘更新崩坏三语音列表’来更新")                
+                voice_path = f"file:///{os.path.join(os.path.dirname(os.path.dirname(__file__)),'assets/record',voice['voice_path'])}"
+                await guessName.finish(MessageSegment.record(voice_path))
+        await guessName.finish(f"没找到【{msg}】的语音，请检查输入。", at_sender=True)
     else:
         for k, v in a_list.items():
             if msg in v:
