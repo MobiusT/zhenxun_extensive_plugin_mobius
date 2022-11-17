@@ -1,7 +1,4 @@
-import json
-import os
-import random
-import re
+import json, os, random, re
 from nonebot import on_command
 from nonebot.permission import SUPERUSER
 from nonebot.adapters.onebot.v11 import MessageSegment, MessageEvent, Message, GroupMessageEvent, GROUP
@@ -36,9 +33,10 @@ __plugin_settings__ = {
 
 guess = on_command("崩坏三猜语音", aliases={"崩三猜语音", "崩3猜语音", "崩坏3猜语音", "猜语音"}, priority=5, permission=GROUP, block=True)
 answer = on_command("崩坏三猜语音答案", aliases={"崩三猜语音答案", "崩3猜语音答案", "崩坏3猜语音答案", "猜语音答案"}, priority=6, permission=GROUP, block=True)
-guessName = on_command("崩坏三语音", aliases={"崩三语音", "崩3语音", "崩坏3语音"}, priority=6, permission=GROUP, block=True)
+voice = on_command("崩坏三语音", aliases={"崩三语音", "崩3语音", "崩坏3语音"}, priority=6, permission=GROUP, block=True)
 addAnswer = on_command("崩坏三语音新增答案", aliases={"崩三语音新增答案", "崩3语音新增答案", "崩坏3语音新增答案"}, priority=5, permission=SUPERUSER, block=True)
 undateVoice = on_command("更新崩坏三语音列表", aliases={"更新崩三语音列表", "更新崩3语音列表", "更新崩坏3语音列表"}, priority=5, permission=SUPERUSER, block=True)
+
 def split_voice_by_chara(v_list: list):
     """对语音列表进行分类"""
     ret = {
@@ -73,10 +71,11 @@ def gen_voice_list(origin_path=None):
             continue
     return ret_list
 
-
+#崩坏三猜语音
 @guess.handle()
 async def guess_voice(event: GroupMessageEvent, arg: Message = CommandArg()):
     msg = arg.extract_plain_text().strip()
+    #判断难度
     if re.search(r"2|困难", msg):
         difficulty = "hard"
     else:
@@ -85,72 +84,89 @@ async def guess_voice(event: GroupMessageEvent, arg: Message = CommandArg()):
     ret = await game.start(difficulty=difficulty)
     await guess.send(ret)
 
-
+#崩坏三猜语音答案
 @answer.handle()
 async def check_answer(event: GroupMessageEvent, arg: Message = CommandArg()):
     game = GameSession(event.group_id)
+    #游戏未开始返回
     if not game.is_start:
         return
     msg = arg.extract_plain_text().strip()
+    #回答是双人时进行符号替换
     msg = msg.lower().replace(",", "和").replace("，", "和")
     await game.check_answer(msg, event.user_id)
 
-
-@guessName.handle()
+#崩坏三语音
+@voice.handle()
 async def send_voice(event: GroupMessageEvent, arg: Message = CommandArg()):
     msg = arg.extract_plain_text().strip()
     a_list = GameSession.__load__("answer.json")
     assert isinstance(a_list, dict)
     listCmd=re.compile(r"^列表")#命令头
     idCmd = re.compile(r"\d+$")#(语音id)
+    #命令包含列表
     if listCmd.search(msg):
+        #获取要查询的女武神名
         msg=listCmd.sub('', msg)  
         for k, v in a_list.items():
+            #获取女武神答案对应标准名称
             if msg in v:
                 try:
+                    #获取名称对应的所有语音（普通难度）
                     v_list = GameSession.__load__()["normal"][k]
                 except KeyError:
-                    await guessName.finish(f"语音列表未生成或有错误，请先发送‘更新崩坏三语音列表’来更新")
-                #voice = random.choice(v_list)
-                #voice_path = f"file:///{os.path.join(os.path.dirname(os.path.dirname(__file__)),'assets/record',voice['voice_path'])}"
+                    await voice.finish(f"语音列表未生成或有错误，请先发送‘更新崩坏三语音列表’来更新")
                 text=""
+                #遍历语音名称
                 for i in range(len(v_list)):
                     text+=f'{i}   {(v_list[i]["voice_name"])[:-4]}\n'
+                #生成图片返回
                 pic = await text_to_pic(text=text)
-                await guessName.finish(MessageSegment.image(pic))
-        await guessName.send(f"没找到【{msg}】的语音，请检查输入。", at_sender=True)
+                await voice.finish(MessageSegment.image(pic))
+        await voice.send(f"没找到【{msg}】的语音，请检查输入。", at_sender=True)
+    #发送指定id的语音
     elif idCmd.search(msg):
         id=idCmd.search(msg)
+        #去除id，获得女武神名称
         name=idCmd.sub('', msg)
         for k, v in a_list.items():
+            #获取女武神答案对应标准名称
             if name in v:
                 try:
+                    #获取名称对应的所有语音（普通难度）
                     v_list = GameSession.__load__()["normal"][k]
+                    #获取对应id语音
                     voice = v_list[int(id.group())]
                 except KeyError:
-                    await guessName.finish(f"语音列表未生成或有错误，请先发送‘更新崩坏三语音列表’来更新")                
+                    await voice.finish(f"语音列表未生成或有错误，请先发送‘更新崩坏三语音列表’来更新")                
+                #发送语音
                 voice_path = f"file:///{os.path.join(os.path.dirname(os.path.dirname(__file__)),'assets/record',voice['voice_path'])}"
-                await guessName.finish(MessageSegment.record(voice_path))
-        await guessName.finish(f"没找到【{msg}】的语音，请检查输入。", at_sender=True)
+                await voice.finish(MessageSegment.record(voice_path))
+        await voice.finish(f"没找到【{msg}】的语音，请检查输入。", at_sender=True)
+    #指定女武神随机语音
     else:
         for k, v in a_list.items():
+            #获取女武神答案对应标准名称
             if msg in v:
                 try:
+                    #获取名称对应的所有语音（普通难度）
                     v_list = GameSession.__load__()["normal"][k]
                 except KeyError:
-                    await guessName.finish(f"语音列表未生成或有错误，请先发送‘更新崩坏三语音列表’来更新")
+                    await voice.finish(f"语音列表未生成或有错误，请先发送‘更新崩坏三语音列表’来更新")
+                #获取随机语音并发送
                 voice = random.choice(v_list)
                 voice_path = f"file:///{os.path.join(os.path.dirname(os.path.dirname(__file__)),'assets/record',voice['voice_path'])}"
-                await guessName.finish(MessageSegment.record(voice_path))
-        await guessName.send(f"没找到【{msg}】的语音，请检查输入。", at_sender=True)
+                await voice.finish(MessageSegment.record(voice_path))
+        await voice.send(f"没找到【{msg}】的语音，请检查输入。", at_sender=True)
 
-
+#崩坏三语音新增答案
 @addAnswer.handle()
 async def add_answer(event: MessageEvent, arg: Message = CommandArg()):
     msg=arg.extract_plain_text().strip()
     if not msg:
         await addAnswer.finish(f"未输入答案", at_sender=True)
     msgArr=msg.replace("：", ":").split(":")
+    #答案格式判断
     if len(msgArr) != 2:
         await addAnswer.finish(f"答案有误，输入参考：崩坏三语音新增答案丽塔(标准答案):缭乱星棘(别称)", at_sender=True)
     origin = msgArr[0].strip()
@@ -160,7 +176,9 @@ async def add_answer(event: MessageEvent, arg: Message = CommandArg()):
         await addAnswer.finish(f"{origin}不存在。")
     if new in data[origin]:
         await addAnswer.finish(f"答案已存在。")
+    #新增答案
     data[origin].append(new)
+    #保存答案
     with open(
         os.path.join(os.path.dirname(__file__), "answer.json"), "w", encoding="utf8"
     ) as f:
