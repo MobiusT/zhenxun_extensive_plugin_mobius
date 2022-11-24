@@ -26,15 +26,13 @@ __plugin_settings__ = {
     "limit_superuser": False,
     "cmd": ["查日志", "getLog"],
 }
-__plugin_task__ = {"getSignLog": "获取签到日志"}
-
-Config.add_plugin_config(
-    "_task",
-    "DEFAULT_GETSIGNLOG",
-    False,
-    help_="被动 定时获取签到日志 进群默认开关状态",
-    default_value=False,
-)
+__plugin_configs__ = {
+    "PUSHQQ": {
+        "value": '', 
+        "help": "需要推送的qq，多个qq用逗号分隔，超级用户无需填写，会自动推送", 
+        "default_value": ''
+    },
+}
 
 getSignLog = on_command("查日志", priority=15, block=True)
 
@@ -65,15 +63,19 @@ async def _():
     # 每日查看
     bot = get_bot()
     if bot:
-        gl = await bot.get_group_list()
-        gl = [g["group_id"] for g in gl]
         logFile = open(LOG_PATH,'r')
         try:
             logStr = logFile.read()
             pic = await text_to_pic(text=logStr)#日志转图片，依赖nonebot_plugin_htmlrender
-            for gid in gl:
-                if await group_manager.check_group_task_status(gid, "getSignLog"):
-                    await bot.send_group_msg(group_id=int(gid), message=MessageSegment.image(pic))                
+            qidList:list = (Config.get_config("getSignLog", "PUSHQQ")).split(',')
+            for superuser in bot.config.superusers:
+                qidList.append(superuser)
+            qidList=list(set(qidList))
+            for qid in qidList:
+                try:
+                    await bot.send_private_msg(user_id=int(qid), message=MessageSegment.image(pic))  
+                except:
+                    logger.error(f"{qid}签到日志推送出错")          
         finally:
             logFile.close()
 
