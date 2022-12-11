@@ -46,7 +46,7 @@ __plugin_cd_limit__ = {
     "cd": 60,
     "rst": "[at]你刚查过，别查了！"
 }
-group = on_regex(r"^(崩坏三|崩三|崩坏3|崩3)(.{3})阵容(.{0,30})$", priority=5, block=True)
+group = on_regex(r"^(崩坏三|崩三|崩坏3|崩3)(.{1,3})阵容(.{0,30})$", priority=5, block=True)
 
 @group.handle()
 async def _(event: MessageEvent, reg_group: Tuple[Any, ...] = RegexGroup()):

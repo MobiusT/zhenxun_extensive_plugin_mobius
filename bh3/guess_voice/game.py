@@ -66,7 +66,7 @@ class GameSession:
         print(self.answer)
         bot = get_bot()
         await bot.send_group_msg(
-            group_id=self.group_id, message=f"即将发送一段崩坏3语音，将在{duration}后公布答案。"
+            group_id=self.group_id, message=f"即将发送一段崩坏3语音，将在{duration}s后公布答案。"
         )
         rs = MessageSegment.record(record_path)
         return rs

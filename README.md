@@ -1,3 +1,9 @@
+<!--
+ * @Author: MobiusT
+ * @Date: 2022-11-03 21:30:42
+ * @LastEditors: MobiusT
+ * @LastEditTime: 2022-12-11 19:09:02
+-->
 # zhenxun_extensive_plugin_mobius
 
 适用于zhenxun_bot的扩展插件
@@ -10,6 +16,7 @@
 - [识宝骂我](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/send_shibao_voice)(改自真寻原版插件骂我)
 - [繁中转简中](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/traditional2simplified)
 - [echo](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/zhenxun_echo)
+- [禁止发烧](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/resendRecallMsgByqid)将指定qq撤回的消息发送至撤回的群聊
 - [定时获取签到日志](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/getSignLog)(自用，通过sh脚本获取日志到插件目录后生成图片推送)
 
 ## 可能遇到的问题
