@@ -33,7 +33,7 @@ __plugin_settings__ = {
 
 guess = on_command("崩坏三猜语音", aliases={"崩三猜语音", "崩3猜语音", "崩坏3猜语音", "猜语音"}, priority=5, permission=GROUP, block=True)
 answer = on_command("崩坏三猜语音答案", aliases={"崩三猜语音答案", "崩3猜语音答案", "崩坏3猜语音答案", "猜语音答案"}, priority=6, permission=GROUP, block=True)
-voice = on_command("崩坏三语音", aliases={"崩三语音", "崩3语音", "崩坏3语音"}, priority=6, permission=GROUP, block=True)
+getVoice = on_command("崩坏三语音", aliases={"崩三语音", "崩3语音", "崩坏3语音"}, priority=6, permission=GROUP, block=True)
 addAnswer = on_command("崩坏三语音新增答案", aliases={"崩三语音新增答案", "崩3语音新增答案", "崩坏3语音新增答案"}, priority=5, permission=SUPERUSER, block=True)
 undateVoice = on_command("更新崩坏三语音列表", aliases={"更新崩三语音列表", "更新崩3语音列表", "更新崩坏3语音列表"}, priority=5, permission=SUPERUSER, block=True)
 
@@ -97,7 +97,7 @@ async def check_answer(event: GroupMessageEvent, arg: Message = CommandArg()):
     await game.check_answer(msg, event.user_id)
 
 #崩坏三语音
-@voice.handle()
+@getVoice.handle()
 async def send_voice(event: GroupMessageEvent, arg: Message = CommandArg()):
     msg = arg.extract_plain_text().strip()
     a_list = GameSession.__load__("answer.json")
@@ -115,15 +115,15 @@ async def send_voice(event: GroupMessageEvent, arg: Message = CommandArg()):
                     #获取名称对应的所有语音（普通难度）
                     v_list = GameSession.__load__()["normal"][k]
                 except KeyError:
-                    await voice.finish(f"语音列表未生成或有错误，请先发送‘更新崩坏三语音列表’来更新")
+                    await getVoice.finish(f"语音列表未生成或有错误，请先发送‘更新崩坏三语音列表’来更新")
                 text=""
                 #遍历语音名称
                 for i in range(len(v_list)):
                     text+=f'{i}   {(v_list[i]["voice_name"])[:-4]}\n'
                 #生成图片返回
                 pic = await text_to_pic(text=text)
-                await voice.finish(MessageSegment.image(pic))
-        await voice.send(f"没找到【{msg}】的语音，请检查输入。", at_sender=True)
+                await getVoice.finish(MessageSegment.image(pic))
+        await getVoice.send(f"没找到【{msg}】的语音，请检查输入。", at_sender=True)
     #发送指定id的语音
     elif idCmd.search(msg):
         id=idCmd.search(msg)
@@ -138,11 +138,11 @@ async def send_voice(event: GroupMessageEvent, arg: Message = CommandArg()):
                     #获取对应id语音
                     voice = v_list[int(id.group())]
                 except KeyError:
-                    await voice.finish(f"语音列表未生成或有错误，请先发送‘更新崩坏三语音列表’来更新")                
+                    await getVoice.finish(f"语音列表未生成或有错误，请先发送‘更新崩坏三语音列表’来更新")                
                 #发送语音
                 voice_path = f"file:///{os.path.join(os.path.dirname(os.path.dirname(__file__)),'assets/record',voice['voice_path'])}"
-                await voice.finish(MessageSegment.record(voice_path))
-        await voice.finish(f"没找到【{msg}】的语音，请检查输入。", at_sender=True)
+                await getVoice.finish(MessageSegment.record(voice_path))
+        await getVoice.finish(f"没找到【{msg}】的语音，请检查输入。", at_sender=True)
     #指定女武神随机语音
     else:
         for k, v in a_list.items():
@@ -152,12 +152,12 @@ async def send_voice(event: GroupMessageEvent, arg: Message = CommandArg()):
                     #获取名称对应的所有语音（普通难度）
                     v_list = GameSession.__load__()["normal"][k]
                 except KeyError:
-                    await voice.finish(f"语音列表未生成或有错误，请先发送‘更新崩坏三语音列表’来更新")
+                    await getVoice.finish(f"语音列表未生成或有错误，请先发送‘更新崩坏三语音列表’来更新")
                 #获取随机语音并发送
                 voice = random.choice(v_list)
                 voice_path = f"file:///{os.path.join(os.path.dirname(os.path.dirname(__file__)),'assets/record',voice['voice_path'])}"
-                await voice.finish(MessageSegment.record(voice_path))
-        await voice.send(f"没找到【{msg}】的语音，请检查输入。", at_sender=True)
+                await getVoice.finish(MessageSegment.record(voice_path))
+        await getVoice.send(f"没找到【{msg}】的语音，请检查输入。", at_sender=True)
 
 #崩坏三语音新增答案
 @addAnswer.handle()
