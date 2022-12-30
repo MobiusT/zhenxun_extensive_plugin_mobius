@@ -2,7 +2,7 @@
 Author: MobiusT
 Date: 2022-12-23 21:09:31
 LastEditors: MobiusT
-LastEditTime: 2022-12-30 22:11:50
+LastEditTime: 2022-12-30 22:22:25
 '''
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import MessageEvent, Message, MessageSegment, GroupMessageEvent
@@ -88,12 +88,16 @@ async def getData(group_id: str):
             continue
         #跳过非终级区
         if 4 != ind.index.stats.battle_field_area:
-            logger.debug(f"群{group_id}成员{qid}非终级区")
+            logger.info(f"群{group_id}成员{qid}非终级区")
             continue
         bfr = ind.battleFieldReport.reports[0]
         #跳过非上周结算
         if str(this_monday())!=str(bfr.time_second.astimezone().date()):
-            logger.debug(f"群{group_id}成员{qid}上周未打深渊")
+            logger.info(f"群{group_id}成员{qid}上周未打战场")
+            continue
+        #跳过没全打boss
+        if len(bfr.battle_infos)<3:
+            logger.info(f"群{group_id}成员{qid}上周未打完全部战场")
             continue
         #boss排序
         (bfr.battle_infos).sort(key=lambda x: x.boss.id)  
@@ -102,7 +106,6 @@ async def getData(group_id: str):
 
     #总分
     rank.sort(key=lambda x: x.battleFieldReport.reports[0].score, reverse=True)
-    logger.debug(f"按总分排序")
     #总模板数据
     paraTotal={}
     #结算时间
