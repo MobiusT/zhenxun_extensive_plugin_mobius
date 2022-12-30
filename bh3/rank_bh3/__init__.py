@@ -2,7 +2,7 @@
 Author: MobiusT
 Date: 2022-12-23 21:09:31
 LastEditors: MobiusT
-LastEditTime: 2022-12-30 22:22:25
+LastEditTime: 2022-12-30 22:53:28
 '''
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import MessageEvent, Message, MessageSegment, GroupMessageEvent
@@ -181,7 +181,7 @@ async def getData(group_id: str):
     #汇总
     template = open(os.path.join(os.path.dirname(__file__), "template.html"), "r", encoding="utf8").read()
     html=template.format(**paraTotal)
-    pic = await html_to_pic(html=html, wait=5, template_path= f"file://{os.path.dirname(__file__)}")
+    pic = await html_to_pic(html=html, wait=5, template_path= f"file://{os.path.dirname(__file__)}", no_viewport=True)
     await battle_field.finish(MessageSegment.image(pic))
 
 
