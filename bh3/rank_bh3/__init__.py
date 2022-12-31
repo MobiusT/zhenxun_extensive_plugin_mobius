@@ -2,22 +2,21 @@
 Author: MobiusT
 Date: 2022-12-23 21:09:31
 LastEditors: MobiusT
-LastEditTime: 2022-12-30 22:53:28
+LastEditTime: 2022-12-31 12:19:25
 '''
 from nonebot import on_command
-from nonebot.adapters.onebot.v11 import MessageEvent, Message, MessageSegment, GroupMessageEvent
+from nonebot.adapters.onebot.v11 import Message, MessageSegment, GroupMessageEvent
 from services.log import logger
 from models.group_member_info import GroupInfoUser
 from nonebot.params import CommandArg
-from utils.message_builder import at
 from configs.config import Config
-from ..modules.mytyping import FullInfo
+from utils.message_builder import image
 from ..modules.database import DB
 from ..modules.image_handle import DrawIndex
 from ..modules.query import InfoError, GetInfo
 from ..modules.util import ItemTrans
-from datetime import datetime, timedelta
 from nonebot_plugin_htmlrender import html_to_pic
+from datetime import datetime, timedelta
 import time, os, re
 
 
@@ -63,7 +62,10 @@ async def _(event: GroupMessageEvent, arg: Message = CommandArg()):
         return
     #获取群内所有qq
     group_id = event.group_id
-    rank = await getData(group_id)
+    image_path = os.path.join(os.path.dirname(__file__), f'image/war_{group_id}_{this_monday()}.png')
+    if not os.path.exists(image_path):
+        await getData(group_id)
+    await battle_field.finish(image(image_path))
 
 async def getData(group_id: str):      
     qqList = await GroupInfoUser.get_group_member_id_list(group_id)
@@ -71,11 +73,18 @@ async def getData(group_id: str):
     qid_db = DB("uid.sqlite", tablename="qid_uid")
     #排行榜
     rank=[]
+    #崩三账号去重用
+    roleIdMap={}
     for qid in qqList:
         try:#获取绑定的角色信息
             role_id = qid_db.get_uid_by_qid(qid)
             region_id = region_db.get_region(role_id)
             role_id = role_id if isinstance(role_id, str) else role_id.group()
+            #去重
+            if role_id in roleIdMap:
+                logger.info(f"群{group_id}成员{qid}所绑定的角色{role_id}重复出现，跳过统计")
+                continue
+            roleIdMap[role_id]=1
         except KeyError:
             logger.debug(f"群{group_id}成员{qid}未绑定角色")
             continue
@@ -182,7 +191,10 @@ async def getData(group_id: str):
     template = open(os.path.join(os.path.dirname(__file__), "template.html"), "r", encoding="utf8").read()
     html=template.format(**paraTotal)
     pic = await html_to_pic(html=html, wait=5, template_path= f"file://{os.path.dirname(__file__)}", no_viewport=True)
-    await battle_field.finish(MessageSegment.image(pic))
+    #写文件
+    with open(os.path.join(os.path.dirname(__file__), f'image/war_{group_id}_{paraTotal["time_second"]}.png'), "ab") as f:
+        f.write(pic)
+
 
 
 def this_monday(today = datetime.now()):

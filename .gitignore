@@ -17,3 +17,4 @@ bh3/guess_voice/answer.json
 resendRecallMsgByqid/recall.json
 bh3/utils/attr.json
 bh3/utils/test.py
+bh3/rank_bh3/image/*.png
