@@ -2,7 +2,7 @@
 Author: MobiusT
 Date: 2022-12-23 21:09:31
 LastEditors: MobiusT
-LastEditTime: 2022-12-31 18:07:23
+LastEditTime: 2022-12-31 18:24:43
 '''
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import GroupMessageEvent
@@ -49,6 +49,19 @@ __plugin_cd_limit__ = {
     "cd": 30,
     "rst": "[at]你刚查过崩三排行，别查了！"
 }
+__plugin_configs__ = {
+    "SHOWCOUNTALL": {
+        "value": 10,         # 配置值
+        "help": "崩三排行，战场总分排行展示数量",            # 配置项说明，为空时则不添加配置项说明注释
+        "default_value": 10   # 当value值为空时返回的默认值   
+    },
+    "SHOWCOUNTBOSS": {
+        "value": 5,         # 配置值
+        "help": "崩三排行，战场每个boss排行展示数量",            # 配置项说明，为空时则不添加配置项说明注释
+        "default_value": 5   # 当value值为空时返回的默认值   
+    },
+}
+
 battle_field = on_command(
     "崩坏三战场排行", aliases={"崩三战场排行", "崩3战场排行", "崩坏3战场排行", "战场排行"}, priority=5, block=True
 )
@@ -157,6 +170,9 @@ async def getData(group_id: str):
         rank.append(ind)
         time.sleep(1)
 
+    #读取配置文件
+    totalCount = Config.get_config("rank_bh3", "SHOWCOUNTALL")
+    bossCount = Config.get_config("rank_bh3", "SHOWCOUNTBOSS")
     #总分
     rank.sort(key=lambda x: x.battleFieldReport.reports[0].score, reverse=True)
     #总模板数据
@@ -203,14 +219,17 @@ async def getData(group_id: str):
         para["nickname"]=i.index.role.nickname
         para["score"]=i.battleFieldReport.reports[0].score
         finalRankTotal += templateRankTotal.format(**para)
+        if rankNo > totalCount:
+            break
     paraTotal["rankTotal"] = finalRankTotal
 
-    #第一个boss
+    #boss
     templateRankBoss = open(os.path.join(os.path.dirname(__file__), "template_rank_boss.html"), "r", encoding="utf8").read()
     for n in range(3):
         finalRankBoss=""
         rank.sort(key=lambda x: x.battleFieldReport.reports[0].battle_infos[n].score, reverse=True)
         logger.debug(f"\n按{rank[0].battleFieldReport.reports[0].battle_infos[n].boss.name}排序")
+        rankNo=1
         for i in rank:
             para={}
             para["nickname"]=i.index.role.nickname
@@ -229,6 +248,9 @@ async def getData(group_id: str):
             para["elf"]=i.battleFieldReport.reports[0].battle_infos[n].elf.avatar
             para["boss"]=i.battleFieldReport.reports[0].battle_infos[n].boss.avatar
             finalRankBoss += templateRankBoss.format(**para)
+            rankNo += 1
+            if rankNo > bossCount:
+                break
         paraTotal[f"rankBoss{n+1}"] = finalRankBoss
 
     #汇总
