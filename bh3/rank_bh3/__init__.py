@@ -2,7 +2,7 @@
 Author: MobiusT
 Date: 2022-12-23 21:09:31
 LastEditors: MobiusT
-LastEditTime: 2022-12-31 12:36:04
+LastEditTime: 2022-12-31 12:48:31
 '''
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import Message, MessageSegment, GroupMessageEvent
@@ -52,20 +52,48 @@ __plugin_cd_limit__ = {
 battle_field = on_command(
     "崩坏三战场排行", aliases={"崩三战场排行", "崩3战场排行", "崩坏3战场排行", "战场排行"}, priority=5, block=True
 )
+battle_field_update = on_command(
+    "崩坏三战场排行更新", aliases={"崩三战场排行更新", "崩3战场排行更新", "崩坏3战场排行更新", "战场排行更新", "崩三战场更新", "崩3战场更新", "崩坏3战场更新", "战场更新"}, priority=5, block=True
+)
 
+#崩坏三战场排行
 @battle_field.handle()
 async def _(event: GroupMessageEvent, arg: Message = CommandArg()):
     #读取配置文件
     cookie = Config.get_config("bind_bh3", "COOKIE")
     if not cookie:
         await battle_field.send("需要真寻主人在config.yaml中配置cookie才能使用该功能")
-        return
-    #获取群内所有qq
+        return   
+    #获取群号 
     group_id = event.group_id
+    #获取战场排行    
     image_path = os.path.join(os.path.dirname(__file__), f'image/war_{group_id}_{this_monday()}.png')
     if not os.path.exists(image_path):
+        await battle_field.send(f'正在更新崩坏三战场排行,耗时较久请耐心等待')  
         await getData(group_id)
     await battle_field.finish(image(image_path))
+
+#崩坏三战场排行更新
+battle_field_update.handle()
+async def _(event: GroupMessageEvent, arg: Message = CommandArg()):
+    #读取配置文件
+    cookie = Config.get_config("bind_bh3", "COOKIE")
+    if not cookie:
+        await battle_field_update.send("需要真寻主人在config.yaml中配置cookie才能使用该功能")
+        return
+    #获取群号
+    group_id = event.group_id
+    #删除战场排行 
+    image_path = os.path.join(os.path.dirname(__file__), f'image/war_{group_id}_{this_monday()}.png')
+    if os.path.exists(image_path):
+        try:
+            os.unlink(image_path)
+        except Exception as e:
+            logger.error(f'更新崩坏三战场排行失败,请联系真寻管理员手动处理：{e}')
+            await battle_field_update.finish(f'更新崩坏三战场排行失败,请联系真寻管理员手动处理：{e}')
+    await battle_field_update.send(f'正在更新崩坏三战场排行,耗时较久请耐心等待')        
+    await getData(group_id)
+    await battle_field_update.finish(f'崩坏三战场排行已更新，请使用命令 崩坏三战场排行 查看') 
 
 async def getData(group_id: str):      
     qqList = await GroupInfoUser.get_group_member_id_list(group_id)
