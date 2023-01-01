@@ -2,7 +2,7 @@
 Author: MobiusT
 Date: 2022-12-23 21:09:31
 LastEditors: MobiusT
-LastEditTime: 2022-12-31 18:24:43
+LastEditTime: 2023-01-01 15:18:14
 '''
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import GroupMessageEvent
@@ -170,15 +170,13 @@ async def getData(group_id: str):
         rank.append(ind)
         time.sleep(1)
 
+
     #读取配置文件
     totalCount = Config.get_config("rank_bh3", "SHOWCOUNTALL")
     bossCount = Config.get_config("rank_bh3", "SHOWCOUNTBOSS")
-    #总分
-    rank.sort(key=lambda x: x.battleFieldReport.reports[0].score, reverse=True)
+
     #总模板数据
     paraTotal={}
-    #结算时间
-    paraTotal["time_second"]=rank[0].battleFieldReport.reports[0].time_second.astimezone().date()
     paraTotal["font"]="""
     @font-face {
 	        font-family: HYWenHei-85W;
@@ -193,10 +191,25 @@ async def getData(group_id: str):
 	        src: url("../assets/font/HYLingXinTiJ.ttf");
         }  
     """
+    #未查到可用数据
+    if len(rank)==0:
+        template = open(os.path.join(os.path.dirname(__file__), "template_none.html"), "r", encoding="utf8").read()
+        html=template.format(**paraTotal)
+        pic = await html_to_pic(html=html, wait=5, template_path= f"file://{os.path.dirname(__file__)}", no_viewport=True)
+        #写文件
+        with open(os.path.join(os.path.dirname(__file__), f'image/war_{group_id}_{this_monday()}.png'), "ab") as f:
+            f.write(pic)
+        return
+        
+    #结算时间
+    paraTotal["time_second"]=rank[0].battleFieldReport.reports[0].time_second.astimezone().date()
+
     #boss名称
     for i in range(1,4):
         paraTotal[f"bossName{i}"] = rank[0].battleFieldReport.reports[0].battle_infos[i-1].boss.name
+
     #总分
+    rank.sort(key=lambda x: x.battleFieldReport.reports[0].score, reverse=True)
     templateRankTotal = open(os.path.join(os.path.dirname(__file__), "template_tank_total.html"), "r", encoding="utf8").read()
     rankNo=1
     finalRankTotal=""
