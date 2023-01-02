@@ -2,7 +2,7 @@
  * @Author: MobiusT
  * @Date: 2022-11-03 21:30:42
  * @LastEditors: MobiusT
- * @LastEditTime: 2022-12-11 19:09:02
+ * @LastEditTime: 2023-01-02 12:06:55
 -->
 # zhenxun_extensive_plugin_mobius
 
@@ -11,7 +11,7 @@
 自学的python，写的可能不是很好（估计有很多bug），见谅
 
 ## 列表
-- [崩坏三](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/bh3)移植自[崩坏三插件](https://github.com/chingkingm/honkai_mys)
+- [崩坏三](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/bh3)移植自[崩坏三插件](https://github.com/chingkingm/honkai_mys) 深渊排行未做
 - [签退](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/reSign)
 - [识宝骂我](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/send_shibao_voice)(改自真寻原版插件骂我)
 - [繁中转简中](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/traditional2simplified)
@@ -25,6 +25,13 @@ return value.encode(encoding or "ascii")
 AttributeError: 'NoneType' object has no attribute 'encode'
 ```
 尝试执行pip install httpx 或 pip install nb-cli
+
+```python
+ValueError: Operation on closed image
+```
+执行pip install pillow==9.1.1
+
+
 
 ```
 签到图片中出现白色方块

@@ -2,7 +2,7 @@
 Author: MobiusT
 Date: 2022-12-23 21:09:31
 LastEditors: MobiusT
-LastEditTime: 2023-01-01 15:18:14
+LastEditTime: 2023-01-02 19:48:02
 '''
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import GroupMessageEvent
@@ -98,9 +98,9 @@ async def _(event: GroupMessageEvent):
     await getData(group_id)
     await battle_field_update.finish(f'已更新崩坏三战场排行，请使用命令 崩坏三战场排行 查看', at_sender=True ) 
 
-@scheduler.scheduled_job(#定时任务，每周一5时
+@scheduler.scheduled_job(#定时任务，每周一、周二5时
     "cron",
-    day_of_week="mon",
+    day_of_week="mon,tue",
     hour=5,
     minute=0,
 )
