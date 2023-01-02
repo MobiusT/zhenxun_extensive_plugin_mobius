@@ -2,7 +2,7 @@
  * @Author: MobiusT
  * @Date: 2022-11-03 21:30:42
  * @LastEditors: MobiusT
- * @LastEditTime: 2022-12-11 19:09:02
+ * @LastEditTime: 2023-01-02 11:50:09
 -->
 # zhenxun_extensive_plugin_mobius
 
@@ -25,6 +25,13 @@ return value.encode(encoding or "ascii")
 AttributeError: 'NoneType' object has no attribute 'encode'
 ```
 尝试执行pip install httpx 或 pip install nb-cli
+
+```python
+ValueError: Operation on closed image
+```
+执行pip install pillow==9.1.1
+
+
 
 ```
 签到图片中出现白色方块
