@@ -10,11 +10,12 @@ bh3/assets/AvatarIcon/*
 bh3/assets/QuestBossIcon/*
 bh3/assets/StigmataIcons/*
 bh3/assets/WeaponIcons/*
+bh3/assets/ElfCardIcons/*
 bh3/sign_bh3/sign_on.json
 bh3/guess_voice/record.json
 bh3/assets/record
 bh3/guess_voice/answer.json
 resendRecallMsgByqid/recall.json
-bh3/utils/attr.json
-bh3/utils/test.py
 bh3/rank_bh3/image/*.png
+test/*
+
