@@ -1,9 +1,12 @@
-import json, os, random, re
+import json, os, random, re, zipfile, traceback
 from nonebot import on_command
 from nonebot.permission import SUPERUSER
 from nonebot.adapters.onebot.v11 import MessageSegment, MessageEvent, Message, GroupMessageEvent, GROUP
 from nonebot.params import CommandArg
 from nonebot_plugin_htmlrender import text_to_pic
+from services.log import logger
+from utils.http_utils import AsyncHttpx
+from nonebot.exception import FinishedException
 from .game import GameSession
 
 __zx_plugin_name__ = "崩坏三猜语音"
@@ -17,11 +20,30 @@ usage：
         崩坏三语音[name]：随机发送指定女武神一段语音
         崩坏三语音列表[name]：查看指定女武神所有语音
         崩坏三语音[name][id]：发送指定女武神的指定语音
+    
+    帮助崩坏三猜语音-super 获取超级用户帮助
+""".strip()
+__plugin_superuser_usage__ = """
+usage：
+    崩坏三猜语音[超级用户功能]
+    指令：
+        崩坏三语音新增答案[标准答案]:[答案别称] 猜语音答案时如果发现正确的女武神名称未能匹配答案时可以使用。如崩坏三语音新增答案丽塔(标准答案):缭乱星棘(别称)
+        更新崩坏三语音列表 更新检索asset/record下语音列表
+        下载崩坏三语音 仅支持全量语音下载，如需增量语音，请前往原作者视频处获取。
+    
+    record文件结构：
+        无论是将完全解压后的文件夹原样放到assets/record还是把子文件夹甚至语音文件直接丢进去都是可以识别的
+        结构没有特殊要求，只要放到assets/record文件夹里即可
+
+    声明：
+        崩坏三语音素材来自于[@YSJS有所建树](https://space.bilibili.com/402667766)的B站视频：[B站首个《崩坏3》常用角色语音素材库公布！可供下载使用。](https://www.bilibili.com/video/BV16J41157du)
+        本仓库素材仅供真寻崩坏三插件使用，不提供解压密码，不收费；禁止商用！
+        如需使用资源，请前往原作者视频处自行免费下载。   
 """.strip()
 __plugin_des__ = "崩坏三猜语音"
-__plugin_cmd__ = ["崩坏三猜语音"]
+__plugin_cmd__ = ["崩坏三猜语音", "崩坏三猜语音答案", "崩坏三语音", "崩坏三语音新增答案 [_superuser]", "更新崩坏三语音列表 [_superuser]", "下载崩坏三语音 [_superuser]"]
 __plugin_type__ = ("崩坏三相关",)
-__plugin_version__ = 0.1
+__plugin_version__ = 0.2
 __plugin_author__ = "mobius"
 __plugin_settings__ = {
     "level": 5,
@@ -36,6 +58,7 @@ answer = on_command("崩坏三猜语音答案", aliases={"崩三猜语音答案"
 getVoice = on_command("崩坏三语音", aliases={"崩三语音", "崩3语音", "崩坏3语音"}, priority=6, permission=GROUP, block=True)
 addAnswer = on_command("崩坏三语音新增答案", aliases={"崩三语音新增答案", "崩3语音新增答案", "崩坏3语音新增答案"}, priority=5, permission=SUPERUSER, block=True)
 undateVoice = on_command("更新崩坏三语音列表", aliases={"更新崩三语音列表", "更新崩3语音列表", "更新崩坏3语音列表"}, priority=5, permission=SUPERUSER, block=True)
+downloadRecord = on_command("下载崩坏三语音", aliases={"下载崩三语音", "下载崩3语音", "下载崩坏3语音"}, priority=5, permission=SUPERUSER, block=True)
 
 def split_voice_by_chara(v_list: list):
     """对语音列表进行分类"""
@@ -185,7 +208,7 @@ async def add_answer(event: MessageEvent, arg: Message = CommandArg()):
         json.dump(data, f, ensure_ascii=False, indent=4)
     await addAnswer.finish("添加完成。")
 
-
+#更新崩坏三语音列表
 @undateVoice.handle()
 async def update_voice_list():
     data = gen_voice_list()
@@ -198,6 +221,85 @@ async def update_voice_list():
     num_hard = sum(len(data_dict["hard"][v]) for v in data_dict["hard"])
     await undateVoice.finish(f"崩坏3语音列表更新完成，当前共有语音{num_hard+num_normal}条，其中普通{num_normal}条，困难{num_hard}条")
 
+#下载链接
+record_url = "https://gitee.com/mobiusT/zhenxun_extensive_plugin_mobius_resource/raw/main/record.zip"
+record_url = "https://ghproxy.com/https://github.com/MobiusT/zhenxun_extensive_plugin_mobius_resource/raw/main/record.zip"
+"""
+崩坏三语音素材来自于[@YSJS有所建树](https://space.bilibili.com/402667766)的B站视频：[B站首个《崩坏3》常用角色语音素材库公布！可供下载使用。](https://www.bilibili.com/video/BV16J41157du)
+
+本仓库素材仅供真寻崩坏三插件使用，不提供解压密码，不收费；禁止商用！
+如需使用资源，请前往原作者视频处自行免费下载。
+
+【关于文件加密措施再次升级的告知】
+前段时间我们多次在第三方的素材网上发现了本文件，并被标上了几元到几十元不等的售价。这点让我们很气愤，这些素材是提供给同人创作者进行创作的文件，免费提供给你们使用，有些人却来我这里“进货”，将我们辛辛苦苦收集提取的素材用于倒卖、销售。你们知道吗？这份素材的原始版权依然是米哈游的，你们倒卖的行为已经涉及到了商业，如果米哈游开始追究，倒卖者和发布者都有相关的责任。为了不必要的麻烦，我们从4.2版本的素材包开始将升级加密机制，将通过算法获取一串随机数以提高素材的获取门槛。或许会麻烦了点，但是我相信，如果是真爱的人这点麻烦是无所谓的。因为麻烦，多多少少也能拦住一些“进货商”。希望这能有效吧。
+
+【2022年3月10日新增告知】
+近期发现有人将本文件搬运至其他平台抹去了所有外包中的作者信息，声称是当事人“本人收集”并开通付费获取的业务，目前经过交涉已将此事处理完毕。为防此类事件再次发生，从5.6版本的素材包起将在不影响使用的前提下对包内部分文件进行防盗处理，以此判定是否为*换皮包*。如果您在其他平台发现有人提供与本包类似的文件，请在群内私信UP主告知并发送样本，经确认后我们将对违规搬运的用户进行处理，感谢您的理解。（“*换皮包*”定义详见下文）
+
+{“*换皮包*”是指下载该文件的用户解压后删除了所有原作者保留的声明信息，并自行打包后转手再次供应给他人的行为，目的可能是为了给自己引流或盈利，具体行为包括但不限于：将本文件删除声明信息后搬运至其他平台或群聊，将本文件删除声明信息后发布至各类网盘，将本文件删除声明信息后设置如“点赞”“关注”“转发”“拉人”等引流行为后获取的规则等……}
+
+总结：
+1.文件只能用于同人创作，不能商用！
+2.文件只能下载者使用，不要随便发给不认识的人，如需发送，请发送全文件。【包括外包的相关说明和主文件包】
+3.绝对严禁标价出售或者提供给用于商业的平台！【如付费下载的语音包服务，会员制的素材网等】
+4.请规范转载！如发现换皮转手后导致违规的，将由违规者自行承担一切后果！
+■请认真阅读后再获取解压码，如违规使用产生的一切后果由违规者自行承担！■
+
+"""
+record_pwd = "BV16J41157du"
+#下载崩坏三语音列表
+@downloadRecord.handle()
+async def _():
+    #下载目录
+    file_path=os.path.join(os.path.dirname(__file__), "../assets/record/")
+    # 创建插件目录
+    if not os.path.exists(file_path):
+        os.makedirs(file_path)
+        # 设置权限755
+        os.chmod(file_path, 0o0755)
+        logger.info(f"创建插件目录{file_path}")
+    #下载文件名
+    zipfile_name=os.path.join(file_path, "record.zip")
+    # 删除旧文件
+    if os.path.exists(zipfile_name):
+        os.unlink(zipfile_name)
+        logger.info(f"删除旧文件{zipfile_name}")
+    data=None
+    try:   
+        #下载压缩包    
+        data=await AsyncHttpx.get(record_url)
+        #写压缩包
+        with open(zipfile_name,'wb') as f:
+            f.write(data.read())
+        #解压压缩包
+        try:
+            with zipfile.ZipFile(zipfile_name, 'r') as f:
+                f.extractall(file_path, pwd=record_pwd.encode("utf-8"))
+        except Exception as e:
+            msg = f"解压{zipfile_name}失败，请手动处理：\n{e}"
+            logger.error(f'{msg}\n{traceback.format_exc()}')
+            await downloadRecord.finish(msg)
+        #检查解压文件夹
+        unzip_folder=os.path.join(file_path, "record")
+        if not os.path.exists(unzip_folder):
+            msg = f"下载资源失败，解压{zipfile_name}文件后未能发现文件夹{unzip_folder}"
+            logger.error(msg)
+            await downloadRecord.finish(msg)
+        #删除压缩包
+        try:
+            os.unlink(zipfile_name)
+        except Exception as e:
+            msg = f"删除压缩包{zipfile_name}失败，请手动处理：\n{e}\n{traceback.format_exc()}"
+            logger.warning(msg)
+        #更新语音列表
+        await update_voice_list()
+        await downloadRecord.finish(f"下载语音资源成功")
+    except FinishedException:
+        return
+    except Exception as e:       
+        msg = f"下载语音资源失败：\n{e}\n{traceback.format_exc()}"
+        logger.error(f'{msg}\n{traceback.format_exc()}')
+        await downloadRecord.finish(msg)
 
 if __name__ == "__main__":
     data = gen_voice_list()
