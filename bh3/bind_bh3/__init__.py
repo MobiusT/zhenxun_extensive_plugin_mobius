@@ -21,7 +21,7 @@ usage：
         崩坏三服务器列表
         崩坏三ck[cookie]     # 该绑定请私聊
         示例：崩坏三绑定114514官服
-            崩坏三ckcookie_token=xxxxxxxxx;account_id=xxxxxxxxxxxxx
+            崩坏三cklogin_ticket==xxxxxxxxxxxxxxx
     如果不明白怎么获取cookie请输入“崩坏三ck”。
 """.strip()
 __plugin_des__ = "绑定自己的崩坏三uid等"
