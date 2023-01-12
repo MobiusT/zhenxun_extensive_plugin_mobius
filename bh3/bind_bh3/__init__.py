@@ -2,10 +2,11 @@ from nonebot import on_command
 from nonebot.adapters.onebot.v11 import MessageEvent, Message, MessageSegment, GroupMessageEvent
 from services.log import logger
 from nonebot.params import CommandArg
+from utils.http_utils import AsyncHttpx
 from utils.message_builder import image
 from ..modules.database import DB
 from ..modules.image_handle import (ItemTrans, DrawFinance)
-from ..modules.query import InfoError, Finance
+from ..modules.query import InfoError, Finance, NotBindError
 import json, re, os
 
 
@@ -110,20 +111,10 @@ async def _(event: MessageEvent, arg: Message = CommandArg()):
         msg = arg.extract_plain_text().strip()
         if not msg:
             img=image('ck.png', os.path.join(os.path.dirname(__file__)))
-            await ck.finish(Message(img+"""私聊发送！！
-            1.以无痕模式打开浏览器（Edge请新建InPrivate窗口）
-            2.打开http://bbs.mihoyo.com/bh3/并登陆
-            3.按下F12打开开发人员工具（不同浏览器按钮可能不同，可以设置里查找），打开控制台
-            4.在下方空白处输入以下命令：
-            var cookie=document.cookie;var ask=confirm('Cookie:'+cookie+'\\n\\nDo you want to copy the cookie to the clipboard?');if(ask==true){copy(cookie);msg=cookie}else{msg='Cancel'}
-            5.按确定即可自动复制，手动复制也可以
-            6.私聊真寻发送：崩坏三ck 刚刚复制的cookie
-               如果遇到真寻不回复可能是ck里部分字符组合触发了真寻黑名单词汇拦截，可以只复制需要的ck内容，例：崩坏三ck cookie_token=xxxxxxxxx;account_id=xxxxxxxxxxxxx
-            7.在不点击登出的情况下关闭无痕浏览器
-                    """))
+            await ck.finish(Message(img + NotBindError.msg))
         #检查是否是私聊
         if isinstance(event, GroupMessageEvent):
-            if msg is "cookie_token=xxxxxxxxx;account_id=xxxxxxxxxxxxx":
+            if msg in ["cookie_token=xxxxxxxxx;account_id=xxxxxxxxxxxxx", "login_ticket==xxxxxxxxxxxxxxx"]:
                 await ck.finish("这是绑定崩坏三cookie的实例，实际绑定的时候务必私聊！务必私聊！务必私聊！")
             await ck.finish("请立即撤回你的消息并私聊发送！")
         #格式调整，删除首尾引号
@@ -134,15 +125,30 @@ async def _(event: MessageEvent, arg: Message = CommandArg()):
         cookie = msg
         # 用: 代替=, ,代替;
         cookie = '{"' + cookie.replace('=', '": "').replace("; ", '","').replace(";", '","') + '"}'
-        print(cookie)
         #反序列化
         cookie_json = json.loads(cookie)
-        print(cookie_json)
-        if 'cookie_token' not in cookie_json:
-            await bind.finish("请发送正确完整的cookie（需包含cookie_token）！")
-        if 'account_id' not in cookie_json:
-            await bind.finish("请发送正确完整的cookie！（需包含account_id）")
-        spider = Finance(qid=qid, cookieraw=cookie_json["account_id"] + "," + cookie_json["cookie_token"])
+        account_id = "" 
+        cookie_token = ""
+        #新增判断是否ck中包含login_ticket，如有则通过login_ticket获取需要的ck
+        if 'login_ticket' in cookie_json:
+            logger.info("使用login_ticket获取ck")
+            bbs_Cookie_url = f"https://webapi.account.mihoyo.com/Api/cookie_accountinfo_by_loginticket?login_ticket={cookie_json['login_ticket']}"
+            res = await AsyncHttpx.get(url=bbs_Cookie_url)
+            res.encoding = "utf-8"
+            data = json.loads(res.text)
+            if "成功" in data["data"]["msg"]:
+                account_id = str(data["data"]["cookie_info"]["account_id"])
+                cookie_token = str(data["data"]["cookie_info"]["cookie_token"])
+            elif data["data"]["msg"] == "登录信息已失效，请重新登录":
+                raise InfoError(f'登录信息失效，请重新获取最新cookie进行绑定')
+        else:
+            if 'cookie_token' not in cookie_json:
+                await bind.finish("请发送正确完整的cookie（需包含cookie_token）！")
+            if 'account_id' not in cookie_json:
+                await bind.finish("请发送正确完整的cookie！（需包含account_id）")
+            account_id = cookie_json["account_id"]
+            cookie_token = cookie_json["cookie_token"]
+        spider = Finance(qid=qid, cookieraw=account_id + "," + cookie_token)
     except InfoError as e:
         await ck.finish(str(e))
     try:
