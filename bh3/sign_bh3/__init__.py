@@ -11,7 +11,7 @@ from datetime import datetime
 from genshinhelper import Honkai3rd
 from genshinhelper.exceptions import GenshinHelperException
 from nonebot_plugin_htmlrender import text_to_pic
-import json, os, asyncio
+import json, os, asyncio, traceback
 
 __zx_plugin_name__ = "崩坏三签到"
 __plugin_usage__ = """
@@ -152,6 +152,10 @@ async def schedule_sign():
                 bot = get_bot()    
                 logger.info(f'崩坏三自动签到 {qid}\n{rs}')      
                 if bot:
-                    await bot.send_private_msg(user_id=int(qid), message=MessageSegment.image(pic))                    
+                    try:
+                        await bot.send_private_msg(user_id=int(qid), message=MessageSegment.image(pic))                    
+                    except Exception as e:
+                        msg = f"发送崩三签到结果给好友{qid}失败：\n{e}\n{traceback.format_exc()}"
+                        logger.error(msg)
                 cnt += 1
     return cnt, sum
