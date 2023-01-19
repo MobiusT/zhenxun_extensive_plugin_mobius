@@ -2,7 +2,7 @@
 Author: MobiusT
 Date: 2022-12-23 21:09:31
 LastEditors: MobiusT
-LastEditTime: 2023-01-02 19:48:02
+LastEditTime: 2023-01-19 21:17:59
 '''
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import GroupMessageEvent
@@ -26,9 +26,9 @@ usage：
     获取群内上一期终极区战场/深渊排行信息
     指令：
         崩坏三战场排行
-        崩坏三深渊排行
+        崩坏三深渊排行（未制作）
         崩坏三战场排行更新
-        崩坏三深渊排行更新
+        崩坏三深渊排行更新（未制作）
         
 """.strip()
 __plugin_des__ = "获取群内上一期终极区战场/深渊排行信息"
@@ -152,7 +152,6 @@ async def getData(group_id: str):
         spider = GetInfo(server_id=region_id, role_id=role_id)
         try:
             ind = await spider.part()
-            print(str(ind))
             ind = DrawIndex(**ind)            
         except InfoError as e:
             continue
@@ -275,9 +274,6 @@ async def getData(group_id: str):
     #汇总
     template = open(os.path.join(os.path.dirname(__file__), "template.html"), "r", encoding="utf8").read()
     html=template.format(**paraTotal)
-    #写文件
-    with open(os.path.join(os.path.dirname(__file__), f'image/war_{group_id}_{paraTotal["time_second"]}.html'), "w", encoding="utf8") as f:
-        f.write(html)
     pic = await html_to_pic(html=html, wait=5, template_path= f"file://{os.path.dirname(__file__)}", no_viewport=True)
     #写文件
     with open(os.path.join(os.path.dirname(__file__), f'image/war_{group_id}_{paraTotal["time_second"]}.png'), "ab") as f:
@@ -292,9 +288,15 @@ def last_monday(today = datetime.now()):
     return (today - timedelta(days=7)).strftime('%Y-%m-%d')
     
 def get_rank_change(group_id, role_id, rank, time_second):
+    group_id = str(group_id)
+    role_id = str(role_id)
+    time_second_str = str(time_second)
     #存本周数据
     data = load_data()
-    data.update({group_id: {role_id: {f'{time_second}': rank}}})    
+    try:
+        (data[group_id][role_id])[time_second_str] = rank
+    except:
+        data.update({group_id: {role_id: {time_second_str: rank}}}) 
     save_data(data)
     #获取上周数据
     try:
