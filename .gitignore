@@ -19,3 +19,4 @@ bh3/guess_voice/answer.json
 resendRecallMsgByqid/recall.json
 bh3/rank_bh3/image/*.png
 test/*
+bh3/rank_bh3/rank.json
