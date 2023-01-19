@@ -56,8 +56,10 @@ async def _(event: MessageEvent, reg_group: Tuple[Any, ...] = RegexGroup()):
         await group.finish("需要真寻主人在config.yaml中配置cookie才能使用该功能")
     groupName = get_message_text(Message(reg_group[1])).strip()
     #特殊适配律三家
-    if groupName == "律三家":
+    if groupName == "虚三家":
         groupName = "终始真"
+    elif groupName == "律三家":
+        groupName = "炎雷理"
     groupJson=getGroupJson()
     groupList = []
     for name in groupName:
