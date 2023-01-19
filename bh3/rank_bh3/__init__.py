@@ -17,7 +17,7 @@ from ..modules.query import InfoError, GetInfo
 from ..modules.util import ItemTrans
 from nonebot_plugin_htmlrender import html_to_pic
 from datetime import datetime, timedelta
-import time, os, re
+import time, os, re, json
 
 
 __zx_plugin_name__ = "崩坏三排行"
@@ -68,6 +68,9 @@ battle_field = on_command(
 battle_field_update = on_command(
     "崩坏三战场排行更新", aliases={"崩三战场排行更新", "崩3战场排行更新", "崩坏3战场排行更新", "战场排行更新", "崩三战场更新", "崩3战场更新", "崩坏3战场更新", "战场更新"}, priority=6, block=True
 )
+
+#战场排名记录json文件
+RANK_JSON = os.path.join(os.path.dirname(__file__), "./rank.json")
 
 #崩坏三战场排行
 @battle_field.handle()
@@ -149,6 +152,7 @@ async def getData(group_id: str):
         spider = GetInfo(server_id=region_id, role_id=role_id)
         try:
             ind = await spider.part()
+            print(str(ind))
             ind = DrawIndex(**ind)            
         except InfoError as e:
             continue
@@ -231,6 +235,8 @@ async def getData(group_id: str):
         para["AvatarUrl"]=a_url
         para["nickname"]=i.index.role.nickname
         para["score"]=i.battleFieldReport.reports[0].score
+        para["percent"]=f"{i.index.stats.battle_field_ranking_percentage}%"
+        para["change"], para["color"]=get_rank_change(group_id, i.index.role.role_id, para["rank"], paraTotal["time_second"])
         finalRankTotal += templateRankTotal.format(**para)
         if rankNo > totalCount:
             break
@@ -269,10 +275,56 @@ async def getData(group_id: str):
     #汇总
     template = open(os.path.join(os.path.dirname(__file__), "template.html"), "r", encoding="utf8").read()
     html=template.format(**paraTotal)
+    #写文件
+    with open(os.path.join(os.path.dirname(__file__), f'image/war_{group_id}_{paraTotal["time_second"]}.html'), "w", encoding="utf8") as f:
+        f.write(html)
     pic = await html_to_pic(html=html, wait=5, template_path= f"file://{os.path.dirname(__file__)}", no_viewport=True)
     #写文件
     with open(os.path.join(os.path.dirname(__file__), f'image/war_{group_id}_{paraTotal["time_second"]}.png'), "ab") as f:
         f.write(pic)
 
+#本周一
 def this_monday(today = datetime.now()):
     return datetime.strftime(today - timedelta(today.weekday()), "%Y-%m-%d")
+
+#上周一
+def last_monday(today = datetime.now()):
+    return (today - timedelta(days=7)).strftime('%Y-%m-%d')
+    
+def get_rank_change(group_id, role_id, rank, time_second):
+    #存本周数据
+    data = load_data()
+    data.update({group_id: {role_id: {f'{time_second}': rank}}})    
+    save_data(data)
+    #获取上周数据
+    try:
+        last_rank = data[group_id][role_id][f'{last_monday(time_second)}']
+    except:
+        #新上榜
+        return "new", "red"
+    #名次变化
+    change = last_rank - rank
+    if change < 0:
+        #名次下降
+        return f'{-change}↓', "green"
+    elif change == 0:
+        #名次不变
+        return '=', "#896a4d"
+    else:
+        #名次上升
+        return f'{change}↑', "red"
+
+#反序列化排行文件
+def load_data():
+    if not os.path.exists(RANK_JSON):
+        with open(RANK_JSON, "w", encoding="utf8") as f:
+            json.dump({}, f)
+            return {}
+    with open(RANK_JSON, "r", encoding="utf8") as f:
+        data: dict = json.load(f)
+        return data
+
+#序列化排行文件
+def save_data(data):
+    with open(RANK_JSON, "w", encoding="utf8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
