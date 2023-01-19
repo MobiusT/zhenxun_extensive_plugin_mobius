@@ -2,7 +2,7 @@
 Author: MobiusT
 Date: 2022-12-23 21:09:31
 LastEditors: MobiusT
-LastEditTime: 2023-01-19 21:17:59
+LastEditTime: 2023-01-19 21:48:51
 '''
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import GroupMessageEvent
@@ -293,10 +293,13 @@ def get_rank_change(group_id, role_id, rank, time_second):
     time_second_str = str(time_second)
     #存本周数据
     data = load_data()
-    try:
-        (data[group_id][role_id])[time_second_str] = rank
-    except:
-        data.update({group_id: {role_id: {time_second_str: rank}}}) 
+    if group_id in data:
+        if role_id in data[group_id]:
+            data[group_id][role_id][time_second_str] = rank
+        else:
+            data[group_id][role_id] = {time_second_str: rank}
+    else:
+        data[group_id] = {role_id: {time_second_str: rank}}
     save_data(data)
     #获取上周数据
     try:
