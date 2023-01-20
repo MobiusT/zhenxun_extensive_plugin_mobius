@@ -20,6 +20,8 @@
 - [定时获取签到日志](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/getSignLog)(自用，通过sh脚本获取日志到插件目录后生成图片推送)
 
 ## 崩坏三插件ck获取方式
+如果已知自己的ck可直接在配置文件中配置，否则按下文处理。示例：COOKIE: cookie_token=xxxxxx;account_id=xxxxxx
+
 1、超级用户私聊真寻【崩三ck】
 
 2、按真寻提示步骤获取login_ticket
