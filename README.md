@@ -2,7 +2,7 @@
  * @Author: MobiusT
  * @Date: 2022-11-03 21:30:42
  * @LastEditors: MobiusT
- * @LastEditTime: 2023-01-02 12:06:55
+ * @LastEditTime: 2023-01-20 19:23:53
 -->
 # zhenxun_extensive_plugin_mobius
 
@@ -11,6 +11,7 @@
 自学的python，写的可能不是很好（估计有很多bug），见谅
 
 ## 列表
+- [猜谜语](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/guess_riddle)改自[24点](https://github.com/CRAZYShimakaze/zhenxun_extensive_plugin/tree/main/24_point) 
 - [崩坏三](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/bh3)移植自[崩坏三插件](https://github.com/chingkingm/honkai_mys) 深渊排行未做
 - [签退](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/reSign)
 - [识宝骂我](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/send_shibao_voice)(改自真寻原版插件骂我)
@@ -20,6 +21,8 @@
 - [定时获取签到日志](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/getSignLog)(自用，通过sh脚本获取日志到插件目录后生成图片推送)
 
 ## 崩坏三插件ck获取方式
+如果已知自己的ck可直接在配置文件中配置，否则按下文处理。示例：COOKIE: cookie_token=xxxxxx;account_id=xxxxxx
+
 1、超级用户私聊真寻【崩三ck】
 
 2、按真寻提示步骤获取login_ticket
