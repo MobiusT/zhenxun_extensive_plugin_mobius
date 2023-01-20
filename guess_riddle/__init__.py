@@ -2,7 +2,7 @@
 Author: MobiusT
 Date: 2023-01-20 18:51:43
 LastEditors: MobiusT
-LastEditTime: 2023-01-20 19:24:17
+LastEditTime: 2023-01-20 19:28:37
 '''
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import GROUP, Bot, GroupMessageEvent, Message
@@ -76,7 +76,7 @@ async def _(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
             else:
                 await BagUser.add_gold(event.user_id, event.group_id, bounce)
                 await bot.send(event,
-                               f"恭喜你回答正确,奖励你{bounce}金币!",
+                               f"答案是{answer[event.group_id]}恭喜你回答正确,奖励你{bounce}金币!",
                                at_sender=True)
                 del answer[event.group_id]
         else:
