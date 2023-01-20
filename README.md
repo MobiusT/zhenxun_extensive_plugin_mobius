@@ -19,6 +19,18 @@
 - [禁止发烧](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/resendRecallMsgByqid)将指定qq撤回的消息发送至撤回的群聊
 - [定时获取签到日志](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/getSignLog)(自用，通过sh脚本获取日志到插件目录后生成图片推送)
 
+## 崩坏三插件ck获取方式
+1、超级用户私聊真寻【崩三ck】
+2、按真寻提示步骤获取login_ticket
+3、私聊真寻【崩坏三ck login_ticket=xxxxxxxxxxxxxxx】
+4、真寻返回【当前未配置查询ck，请在真寻配置文件config.yaml的bind_bh3.COOKIE下配置如下内容，然后重启真寻。
+cookie_token=xxxxxx;account_id=xxxxxx】
+根据真寻返回的内容进行配置
+
+提示：
+1、第4步仅在超级用户且未配置崩坏三ck时返回，否则为绑定游戏账户ck，用于崩三手账及签到
+2、配置完毕后需要重启真寻才能正常使用，重载配置无效 
+
 ## 可能遇到的问题
 ```python
 return value.encode(encoding or "ascii")
