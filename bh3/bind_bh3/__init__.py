@@ -1,7 +1,8 @@
 from nonebot import on_command
-from nonebot.adapters.onebot.v11 import MessageEvent, Message, MessageSegment, GroupMessageEvent
+from nonebot.adapters.onebot.v11 import Bot, MessageEvent, Message, MessageSegment, GroupMessageEvent
 from services.log import logger
 from nonebot.params import CommandArg
+from configs.config import Config
 from utils.http_utils import AsyncHttpx
 from utils.message_builder import image
 from ..modules.database import DB
@@ -38,7 +39,7 @@ __plugin_settings__ = {
 __plugin_configs__ = {
     "COOKIE": {
         "value": '', 
-        "help": "登录https://bbs.mihoyo.com/bh3/ 后F12控制台输入document.cookie获取ck: cookie_token=xxxxxx;account_id=xxxxxx", 
+        "help": "超级用户私聊真寻【崩三ck】按提示步骤获取login_ticket，根据真寻返回的内容进行配置，示例: cookie_token=xxxxxx;account_id=xxxxxx", 
         "default_value": ''
     }
 }
@@ -97,21 +98,27 @@ async def _(event: MessageEvent):
 
 #崩坏三ck
 @ck.handle()
-async def _(event: MessageEvent, arg: Message = CommandArg()):
-    qid_db = DB("uid.sqlite", tablename="qid_uid")
-    qid = event.user_id
-    #验证uid绑定状态
-    try:
-        qid_db.get_uid_by_qid(qid)
-    except:
-        await ck.finish("请先绑定uid，如崩坏三绑定114514官服")
+async def _(bot: Bot, event: MessageEvent, arg: Message = CommandArg()):
+    #获取参数
+    msg = arg.extract_plain_text().strip()
+    if not msg:
+        img=image('ck.png', os.path.join(os.path.dirname(__file__)))
+        await ck.finish(Message(img + NotBindError.msg))
+    ck_flag = True
+    #读取配置文件
+    cookie = Config.get_config("bind_bh3", "COOKIE")
+    if (not cookie) and (str(event.user_id) in bot.config.superusers):
+        ck_flag = False
+    if ck_flag:
+        qid_db = DB("uid.sqlite", tablename="qid_uid")
+        qid = event.user_id
+        #验证uid绑定状态
+        try:
+            qid_db.get_uid_by_qid(qid)
+        except:
+            await ck.finish("请先绑定uid，如崩坏三绑定114514官服")
 
     try:
-        #获取参数
-        msg = arg.extract_plain_text().strip()
-        if not msg:
-            img=image('ck.png', os.path.join(os.path.dirname(__file__)))
-            await ck.finish(Message(img + NotBindError.msg))
         #检查是否是私聊
         if isinstance(event, GroupMessageEvent):
             if msg in ["cookie_token=xxxxxxxxx;account_id=xxxxxxxxxxxxx", "login_ticket==xxxxxxxxxxxxxxx"]:
@@ -139,6 +146,9 @@ async def _(event: MessageEvent, arg: Message = CommandArg()):
             if "成功" in data["data"]["msg"]:
                 account_id = str(data["data"]["cookie_info"]["account_id"])
                 cookie_token = str(data["data"]["cookie_info"]["cookie_token"])
+                if not ck_flag:
+                    msg = f"当前未配置查询ck，请在真寻配置文件config.yaml的bind_bh3.COOKIE下配置如下内容，然后重启真寻。\ncookie_token={cookie_token};account_id={account_id}"
+                    await bind.finish(msg)
             elif data["data"]["msg"] == "登录信息已失效，请重新登录":
                 raise InfoError(f'登录信息失效，请重新获取最新cookie进行绑定')
         else:
