@@ -2,7 +2,7 @@
 Author: MobiusT
 Date: 2022-12-23 21:09:31
 LastEditors: MobiusT
-LastEditTime: 2023-01-19 21:48:51
+LastEditTime: 2023-01-27 13:01:18
 '''
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import GroupMessageEvent
@@ -128,6 +128,7 @@ async def getData(group_id: str):
         except Exception as e:
             logger.error(f'更新崩坏三战场排行失败,请联系真寻管理员手动处理：{e}')
             await battle_field_update.finish(f'更新崩坏三战场排行失败,请联系真寻管理员手动处理：{e}')
+
     qqList = await GroupInfoUser.get_group_member_id_list(group_id)
     region_db = DB("uid.sqlite", tablename="uid_region")
     qid_db = DB("uid.sqlite", tablename="qid_uid")
@@ -173,7 +174,6 @@ async def getData(group_id: str):
         rank.append(ind)
         time.sleep(1)
 
-
     #读取配置文件
     totalCount = Config.get_config("rank_bh3", "SHOWCOUNTALL")
     bossCount = Config.get_config("rank_bh3", "SHOWCOUNTBOSS")
@@ -211,6 +211,13 @@ async def getData(group_id: str):
     for i in range(1,4):
         paraTotal[f"bossName{i}"] = rank[0].battleFieldReport.reports[0].battle_infos[i-1].boss.name
 
+    #获取rank数据
+    rank_data = load_data()
+    #清除原数据,避免因更新战场时掉出榜单而导致出现多个重复名次
+    for rid in rank_data[str(group_id)]:
+        if str(paraTotal["time_second"]) in rank_data[str(group_id)][rid]:
+            rank_data[str(group_id)][rid].pop(str(paraTotal["time_second"]))
+
     #总分
     rank.sort(key=lambda x: x.battleFieldReport.reports[0].score, reverse=True)
     templateRankTotal = open(os.path.join(os.path.dirname(__file__), "template_tank_total.html"), "r", encoding="utf8").read()
@@ -235,7 +242,7 @@ async def getData(group_id: str):
         para["nickname"]=i.index.role.nickname
         para["score"]=i.battleFieldReport.reports[0].score
         para["percent"]=f"{i.index.stats.battle_field_ranking_percentage}%"
-        para["change"], para["color"]=get_rank_change(group_id, i.index.role.role_id, para["rank"], paraTotal["time_second"])
+        para["change"], para["color"]=get_rank_change(group_id, i.index.role.role_id, para["rank"], paraTotal["time_second"], rank_data)
         finalRankTotal += templateRankTotal.format(**para)
         if rankNo > totalCount:
             break
@@ -275,9 +282,11 @@ async def getData(group_id: str):
     template = open(os.path.join(os.path.dirname(__file__), "template.html"), "r", encoding="utf8").read()
     html=template.format(**paraTotal)
     pic = await html_to_pic(html=html, wait=5, template_path= f"file://{os.path.dirname(__file__)}", no_viewport=True)
-    #写文件
+    #写排行图片
     with open(os.path.join(os.path.dirname(__file__), f'image/war_{group_id}_{paraTotal["time_second"]}.png'), "ab") as f:
         f.write(pic)
+    #写rank数据
+    save_data(rank_data)
 
 #本周一
 def this_monday(today = datetime.now()):
@@ -287,12 +296,10 @@ def this_monday(today = datetime.now()):
 def last_monday(today = datetime.now()):
     return (today - timedelta(days=7)).strftime('%Y-%m-%d')
     
-def get_rank_change(group_id, role_id, rank, time_second):
+def get_rank_change(group_id, role_id, rank, time_second, data):
     group_id = str(group_id)
     role_id = str(role_id)
-    time_second_str = str(time_second)
-    #存本周数据
-    data = load_data()
+    time_second_str = str(time_second)        
     if group_id in data:
         if role_id in data[group_id]:
             data[group_id][role_id][time_second_str] = rank
@@ -300,7 +307,6 @@ def get_rank_change(group_id, role_id, rank, time_second):
             data[group_id][role_id] = {time_second_str: rank}
     else:
         data[group_id] = {role_id: {time_second_str: rank}}
-    save_data(data)
     #获取上周数据
     try:
         last_rank = data[group_id][role_id][f'{last_monday(time_second)}']
