@@ -2,7 +2,7 @@
 Author: MobiusT
 Date: 2022-12-23 21:09:31
 LastEditors: MobiusT
-LastEditTime: 2023-01-27 13:01:18
+LastEditTime: 2023-01-28 18:45:21
 '''
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import GroupMessageEvent
@@ -214,9 +214,10 @@ async def getData(group_id: str):
     #获取rank数据
     rank_data = load_data()
     #清除原数据,避免因更新战场时掉出榜单而导致出现多个重复名次
-    for rid in rank_data[str(group_id)]:
-        if str(paraTotal["time_second"]) in rank_data[str(group_id)][rid]:
-            rank_data[str(group_id)][rid].pop(str(paraTotal["time_second"]))
+    if str(group_id) in rank_data:
+        for rid in rank_data[str(group_id)]:
+            if str(paraTotal["time_second"]) in rank_data[str(group_id)][rid]:
+                rank_data[str(group_id)][rid].pop(str(paraTotal["time_second"]))
 
     #总分
     rank.sort(key=lambda x: x.battleFieldReport.reports[0].score, reverse=True)
