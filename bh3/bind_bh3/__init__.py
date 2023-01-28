@@ -5,6 +5,7 @@ from nonebot.params import CommandArg
 from configs.config import Config
 from utils.http_utils import AsyncHttpx
 from utils.message_builder import image
+from plugins.genshin.query_user._models import Genshin
 from ..modules.database import DB
 from ..modules.image_handle import (ItemTrans, DrawFinance)
 from ..modules.query import InfoError, Finance, NotBindError
@@ -21,6 +22,7 @@ usage：
         崩坏三绑定[uid][服务器]
         崩坏三服务器列表
         崩坏三ck[cookie]     # 该绑定请私聊
+        崩坏三ck同步         # 该命令要求先绑定原神cookie，通过绑定的原神cookie绑定崩三ck
         示例：崩坏三绑定114514官服
             崩坏三cklogin_ticket==xxxxxxxxxxxxxxx
     如果不明白怎么获取cookie请输入“崩坏三ck”。
@@ -117,29 +119,39 @@ async def _(bot: Bot, event: MessageEvent, arg: Message = CommandArg()):
             qid_db.get_uid_by_qid(qid)
         except:
             await ck.finish("请先绑定uid，如崩坏三绑定114514官服")
-
     try:
-        #检查是否是私聊
-        if isinstance(event, GroupMessageEvent):
-            if msg in ["cookie_token=xxxxxxxxx;account_id=xxxxxxxxxxxxx", "login_ticket==xxxxxxxxxxxxxxx"]:
-                await ck.finish("这是绑定崩坏三cookie的实例，实际绑定的时候务必私聊！务必私聊！务必私聊！")
-            await ck.finish("请立即撤回你的消息并私聊发送！")
-        #格式调整，删除首尾引号
-        if msg.startswith('"') or msg.startswith("'"):
-            msg = msg[1:]
-        if msg.endswith('"') or msg.endswith("'"):
-            msg = msg[:-1]
-        cookie = msg
-        # 用: 代替=, ,代替;
-        cookie = '{"' + cookie.replace('=', '": "').replace("; ", '","').replace(";", '","') + '"}'
-        #反序列化
-        cookie_json = json.loads(cookie)
-        account_id = "" 
-        cookie_token = ""
+        #同步真寻原神ck
+        login_ticket = None
+        if "同步" == msg:
+            #获取原神uid
+            genshin_user = await Genshin.get_user_by_qq(event.user_id)
+            login_ticket = genshin_user.login_ticket
+            if not login_ticket:
+                raise InfoError(f'尚未绑定原神cookie，请先绑定原神cookie或发送 崩坏三ck 绑定崩坏三ck')
+        else:
+            #检查是否是私聊
+            if isinstance(event, GroupMessageEvent):
+                if msg in ["cookie_token=xxxxxxxxx;account_id=xxxxxxxxxxxxx", "login_ticket==xxxxxxxxxxxxxxx"]:
+                    await ck.finish("这是绑定崩坏三cookie的实例，实际绑定的时候务必私聊！务必私聊！务必私聊！")
+                await ck.finish("请立即撤回你的消息并私聊发送！")
+            #格式调整，删除首尾引号
+            if msg.startswith('"') or msg.startswith("'"):
+                msg = msg[1:]
+            if msg.endswith('"') or msg.endswith("'"):
+                msg = msg[:-1]
+            cookie = msg
+            # 用: 代替=, ,代替;
+            cookie = '{"' + cookie.replace('=', '": "').replace("; ", '","').replace(";", '","') + '"}'
+            #反序列化
+            cookie_json = json.loads(cookie)
+            account_id = "" 
+            cookie_token = ""
         #新增判断是否ck中包含login_ticket，如有则通过login_ticket获取需要的ck
-        if 'login_ticket' in cookie_json:
+            if 'login_ticket' in cookie_json:
+                login_ticket = cookie_json['login_ticket']
+        if login_ticket:
             logger.info("使用login_ticket获取ck")
-            bbs_Cookie_url = f"https://webapi.account.mihoyo.com/Api/cookie_accountinfo_by_loginticket?login_ticket={cookie_json['login_ticket']}"
+            bbs_Cookie_url = f"https://webapi.account.mihoyo.com/Api/cookie_accountinfo_by_loginticket?login_ticket={login_ticket}"
             res = await AsyncHttpx.get(url=bbs_Cookie_url)
             res.encoding = "utf-8"
             data = json.loads(res.text)
@@ -147,6 +159,9 @@ async def _(bot: Bot, event: MessageEvent, arg: Message = CommandArg()):
                 account_id = str(data["data"]["cookie_info"]["account_id"])
                 cookie_token = str(data["data"]["cookie_info"]["cookie_token"])
                 if not ck_flag:
+                    #检查是否是私聊
+                    if isinstance(event, GroupMessageEvent):
+                        await ck.finish("请立即撤回你的消息并私聊发送！")
                     msg = f"当前未配置查询ck，请在真寻配置文件config.yaml的bind_bh3.COOKIE下配置如下内容，然后重启真寻。\ncookie_token={cookie_token};account_id={account_id}"
                     await bind.finish(msg)
             elif data["data"]["msg"] == "登录信息已失效，请重新登录":

@@ -52,8 +52,10 @@ class NotBindError(Exception):
         var cookie=document.cookie;var ask=confirm('Cookie:'+cookie+'\\n\\nDo you want to copy the cookie to the clipboard?');if(ask==true){copy(cookie);msg=cookie}else{msg='Cancel'}
         6.按确定即可自动复制，手动复制也可以
         7.私聊真寻发送：崩坏三ck 刚刚复制的cookie
-            如果遇到真寻不回复可能是ck里部分字符组合触发了真寻黑名单词汇拦截，可以只复制需要的ck内容
-            例：崩坏三ck login_ticket=xxxxxxxxxxxxxxx
+            如果遇到真寻不回复可能是ck里部分字符组合触发了真寻黑名单词汇拦截，可以以下方法任选其一：
+            a) 只复制需要的ck内容
+                例：崩坏三ck login_ticket=xxxxxxxxxxxxxxx
+            b) 绑定原神cookie后输入 崩坏三ck同步
         8.在不点击登出的情况下关闭无痕浏览器
 
 """
