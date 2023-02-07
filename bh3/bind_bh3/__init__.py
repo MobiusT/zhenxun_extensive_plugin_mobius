@@ -182,6 +182,12 @@ async def _(bot: Bot, event: MessageEvent, arg: Message = CommandArg()):
                 await bind.finish("请发送正确完整的cookie（需包含cookie_token）！")
             if 'account_id' not in cookie_json:
                 await bind.finish("请发送正确完整的cookie！（需包含account_id）")
+            if not ck_flag:
+                #检查是否是私聊
+                if isinstance(event, GroupMessageEvent):
+                    await ck.finish("请立即撤回你的消息并私聊发送！")
+                msg = f"当前未配置查询ck，请在真寻配置文件config.yaml的bind_bh3.COOKIE下配置如下内容，然后重启真寻。\ncookie_token={cookie_json['cookie_token']};account_id={cookie_json['account_id']}"
+                await bind.finish(msg)
             account_id = cookie_json["account_id"]
             cookie_token = cookie_json["cookie_token"]
         spider = Finance(qid=qid, cookieraw=account_id + "," + cookie_token)
