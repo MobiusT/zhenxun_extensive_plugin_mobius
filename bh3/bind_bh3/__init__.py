@@ -122,12 +122,23 @@ async def _(bot: Bot, event: MessageEvent, arg: Message = CommandArg()):
     try:
         #同步真寻原神ck
         login_ticket = None
+        account_id = None
+        cookie_token = None
+        cookie_json = None
         if "同步" == msg:
             #获取原神uid
             genshin_user = await Genshin.get_user_by_qq(event.user_id)
             login_ticket = genshin_user.login_ticket
             if not login_ticket:
-                raise InfoError(f'尚未绑定原神cookie，请先绑定原神cookie或发送 崩坏三ck 绑定崩坏三ck')
+                if not genshin_user.cookie:
+                    raise InfoError(f'尚未绑定原神cookie，请先绑定原神cookie或发送 崩坏三ck 绑定崩坏三ck')
+                else:
+                    cookie = genshin_user.cookie
+                    # 用: 代替=, ,代替;
+                    cookie = '{"' + cookie.replace('=', '": "').replace("; ", '","').replace(";", '","') + '"}'
+                    #反序列化
+                    cookie_json = json.loads(cookie)
+
         else:
             #检查是否是私聊
             if isinstance(event, GroupMessageEvent):
