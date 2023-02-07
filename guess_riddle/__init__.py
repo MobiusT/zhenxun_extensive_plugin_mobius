@@ -69,7 +69,11 @@ async def _(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
         if answer[event.group_id]:
             msg = arg.extract_plain_text().strip()
             bounce = 100
-            if msg not in answer[event.group_id]:
+            if not msg:
+                await bot.send(event,
+                               "答案呢?",
+                               at_sender=True)
+            elif msg not in answer[event.group_id]:
                 await bot.send(event,
                                "答案不对!",
                                at_sender=True)
