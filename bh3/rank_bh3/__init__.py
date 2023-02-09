@@ -196,7 +196,7 @@ async def getData(group_id: str):
     """
     #未查到可用数据
     if len(rank)==0:
-        template = open(os.path.join(os.path.dirname(__file__), "template_none.html"), "r", encoding="utf8").read()
+        template = open(os.path.join(os.path.dirname(__file__), "template_battle_none.html"), "r", encoding="utf8").read()
         html=template.format(**paraTotal)
         pic = await html_to_pic(html=html, wait=5, template_path= f"file://{os.path.dirname(__file__)}", no_viewport=True)
         #写文件
@@ -221,7 +221,7 @@ async def getData(group_id: str):
 
     #总分
     rank.sort(key=lambda x: x.battleFieldReport.reports[0].score, reverse=True)
-    templateRankTotal = open(os.path.join(os.path.dirname(__file__), "template_tank_total.html"), "r", encoding="utf8").read()
+    templateRankTotal = open(os.path.join(os.path.dirname(__file__), "template_battle_rank_total.html"), "r", encoding="utf8").read()
     rankNo=1
     finalRankTotal=""
     for i in rank:  
@@ -250,7 +250,7 @@ async def getData(group_id: str):
     paraTotal["rankTotal"] = finalRankTotal
 
     #boss
-    templateRankBoss = open(os.path.join(os.path.dirname(__file__), "template_rank_boss.html"), "r", encoding="utf8").read()
+    templateRankBoss = open(os.path.join(os.path.dirname(__file__), "template_battle_rank_boss.html"), "r", encoding="utf8").read()
     for n in range(3):
         finalRankBoss=""
         rank.sort(key=lambda x: x.battleFieldReport.reports[0].battle_infos[n].score, reverse=True)
@@ -280,7 +280,7 @@ async def getData(group_id: str):
         paraTotal[f"rankBoss{n+1}"] = finalRankBoss
 
     #汇总
-    template = open(os.path.join(os.path.dirname(__file__), "template.html"), "r", encoding="utf8").read()
+    template = open(os.path.join(os.path.dirname(__file__), "template_battle.html"), "r", encoding="utf8").read()
     html=template.format(**paraTotal)
     pic = await html_to_pic(html=html, wait=5, template_path= f"file://{os.path.dirname(__file__)}", no_viewport=True)
     #写排行图片
