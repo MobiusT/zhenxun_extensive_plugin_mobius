@@ -2,7 +2,7 @@
 Author: MobiusT
 Date: 2022-12-23 21:09:31
 LastEditors: MobiusT
-LastEditTime: 2023-02-10 21:43:44
+LastEditTime: 2023-02-10 21:50:31
 '''
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, MessageSegment, MessageEvent
@@ -211,12 +211,12 @@ async def getAbyssData(group_id: str):
     if str(group_id) in rank_data:
         if "abyss_cup" in rank_data[str(group_id)]:
             for rid in rank_data[str(group_id)]["abyss_cup"]:
-                if str(paraTotal["time_second"]) in rank_data[str(group_id)]["abyss_cup"][rid]:
-                    rank_data[str(group_id)]["abyss_cup"][rid].pop(str(paraTotal["time_second"]))
+                if str(last_cutoff_day(is_abyss = True)) in rank_data[str(group_id)]["abyss_cup"][rid]:
+                    rank_data[str(group_id)]["abyss_cup"][rid].pop(str(last_cutoff_day(is_abyss = True)))
         if "abyss_score" in rank_data[str(group_id)]:
             for rid in rank_data[str(group_id)]["abyss_score"]:
-                if str(paraTotal["time_second"]) in rank_data[str(group_id)]["abyss_score"][rid]:
-                    rank_data[str(group_id)]["abyss_score"][rid].pop(str(paraTotal["time_second"]))
+                if str(last_cutoff_day(is_abyss = True)) in rank_data[str(group_id)]["abyss_score"][rid]:
+                    rank_data[str(group_id)]["abyss_score"][rid].pop(str(last_cutoff_day(is_abyss = True)))
     for region in rank.keys():
         #总模板数据
         paraTotal={}
