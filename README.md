@@ -2,7 +2,7 @@
  * @Author: MobiusT
  * @Date: 2022-11-03 21:30:42
  * @LastEditors: MobiusT
- * @LastEditTime: 2023-01-20 19:23:53
+ * @LastEditTime: 2023-02-10 22:32:15
 -->
 # zhenxun_extensive_plugin_mobius
 
@@ -12,7 +12,7 @@
 
 ## 列表
 - [猜谜语](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/guess_riddle)改自[24点](https://github.com/CRAZYShimakaze/zhenxun_extensive_plugin/tree/main/24_point) 
-- [崩坏三](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/bh3)移植自[崩坏三插件](https://github.com/chingkingm/honkai_mys) 深渊排行未做
+- [崩坏三](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/bh3)移植自[崩坏三插件](https://github.com/chingkingm/honkai_mys) 
 - [签退](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/reSign)
 - [识宝骂我](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/send_shibao_voice)(改自真寻原版插件骂我)
 - [繁中转简中](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/traditional2simplified)
