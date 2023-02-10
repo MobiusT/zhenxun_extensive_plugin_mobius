@@ -2,15 +2,15 @@
 Author: MobiusT
 Date: 2022-12-23 21:09:31
 LastEditors: MobiusT
-LastEditTime: 2023-01-28 18:45:21
+LastEditTime: 2023-02-10 21:33:16
 '''
 from nonebot import on_command
-from nonebot.adapters.onebot.v11 import GroupMessageEvent, Message
+from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, MessageSegment, MessageEvent
 from nonebot.params import CommandArg
 from services.log import logger
 from models.group_member_info import GroupInfoUser
 from configs.config import Config
-from utils.message_builder import image
+from utils.message_builder import image, custom_forward_msg
 from utils.utils import get_bot, scheduler
 from ..modules.database import DB
 from ..modules.image_handle import DrawIndex
@@ -27,9 +27,9 @@ usage：
     获取群内上一期终极区战场/深渊排行信息
     指令：
         崩坏三战场排行
-        崩坏三深渊排行（未制作）
+        崩坏三深渊排行[全部/all]
         崩坏三战场排行更新
-        崩坏三深渊排行更新（未制作）
+        崩坏三深渊排行更新
         
 """.strip()
 __plugin_des__ = "获取群内上一期终极区战场/深渊排行信息"
@@ -72,6 +72,9 @@ battle_field_update = on_command(
 abyss = on_command(
     "崩坏三深渊排行", aliases={"崩三深渊排行", "崩3深渊排行", "崩坏3深渊排行", "深渊排行"}, priority=5, block=True
 )
+abyss_update = on_command(
+    "崩坏三深渊排行更新", aliases={"崩三深渊排行更新", "崩3深渊排行更新", "崩坏3深渊排行更新", "深渊排行更新", "崩三深渊更新", "崩3深渊更新", "崩坏3深渊更新", "深渊更新"}, priority=6, block=True
+)
 
 #排名记录json文件
 RANK_JSON = os.path.join(os.path.dirname(__file__), "./rank.json")
@@ -79,13 +82,25 @@ REGION_LIST=["android01", "bb01", "hun01", "hun02", "pc01", "yyb01", "ios01"]
 
 #崩坏三深渊排行
 @abyss.handle()
-async def _(event: GroupMessageEvent, arg: Message = CommandArg()):
+async def _(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
     #读取配置文件
     cookie = Config.get_config("bind_bh3", "COOKIE")
     if not cookie:
         await abyss.finish("需要真寻主人在config.yaml中配置cookie才能使用该功能")
     #获取群号 
     group_id = event.group_id
+    #获取参数
+    msg = arg.extract_plain_text().strip()
+    if  msg in ["all", "全部"]:
+        msgs=[]
+        for r in REGION_LIST:
+            image_path = os.path.join(os.path.dirname(__file__), f'image/abyss_{group_id}_{r}_{last_cutoff_day(is_abyss = True)}.png')
+            if not os.path.exists(image_path):
+                await abyss.send(f'正在更新崩坏三深渊排行,耗时较久请耐心等待')  
+                await getAbyssData(group_id)
+            msgs.append(image(image_path))
+        await bot.send_group_forward_msg(group_id=event.group_id, messages=custom_forward_msg(msgs, bot.self_id))
+        return
     qid_db = DB("uid.sqlite", tablename="qid_uid")
     region_db = DB("uid.sqlite", tablename="uid_region")
     try:#获取绑定的角色信息
@@ -100,6 +115,37 @@ async def _(event: GroupMessageEvent, arg: Message = CommandArg()):
         await abyss.send(f'正在更新崩坏三深渊排行,耗时较久请耐心等待')  
         await getAbyssData(group_id)
     await abyss.finish(image(image_path))
+
+#崩坏三深渊排行更新
+@abyss_update.handle()
+async def _(event: GroupMessageEvent):
+    #读取配置文件
+    cookie = Config.get_config("bind_bh3", "COOKIE")
+    if not cookie:
+        await abyss_update.finish("需要真寻主人在config.yaml中配置cookie才能使用该功能")
+    #获取群号
+    group_id = event.group_id    
+    await abyss_update.send(f'正在更新崩坏三深渊排行,耗时较久请耐心等待')        
+    await getAbyssData(group_id)
+    await abyss_update.finish(f'已更新崩坏三深渊排行，请使用命令 崩坏三深渊排行 或 崩坏三深渊排行全部 查看', at_sender=True ) 
+
+@scheduler.scheduled_job(#定时任务，每周一、周四6时
+    "cron",
+    day_of_week="mon,thu",
+    hour=6,
+    minute=0,
+)
+async def _():
+    try:
+        bot = get_bot()
+        gl = await bot.get_group_list()
+        gl = [g["group_id"] for g in gl]
+        for g in gl:
+            await getAbyssData(g)
+            logger.info(f"{g} 生成深渊排行成功")
+            time.sleep(60)
+    except Exception as e:
+        logger.error(f"生成深渊排行错误 e:{e}")
 
 async def getAbyssData(group_id: str):      
     # 删除深渊排行 
@@ -234,41 +280,46 @@ async def getAbyssData(group_id: str):
             if rankNo > totalCount:
                 break
         paraTotal["rankTotal"] = finalRankTotal
-        '''
+
         #boss
         templateRankBoss = open(os.path.join(os.path.dirname(__file__), "template_abyss_rank_boss.html"), "r", encoding="utf8").read()
         finalRankBoss=""
         rank[region].sort(key=lambda x: (x.newAbyssReport.reports[0].settled_level, x.newAbyssReport.reports[0].score), reverse=True)
         rankNo=1
         for i in rank[region]:
+            para["rank"] = rankNo
             para={}
             para["nickname"]=i.index.role.nickname
-            para["server"]=ItemTrans.id2server(i.index.role.region)
-            para["score"]=i.battleFieldReport.reports[0].battle_infos[n].score
-            para["star1"]=["b", "a", "s", "ss", "sss"][i.battleFieldReport.reports[0].battle_infos[n].lineup[0].star - 1]
-            para["star2"]=["b", "a", "s", "ss", "sss"][i.battleFieldReport.reports[0].battle_infos[n].lineup[1].star - 1]
-            para["star3"]=["b", "a", "s", "ss", "sss"][i.battleFieldReport.reports[0].battle_infos[n].lineup[2].star - 1]
-            para["star4"]=[1, 2, 2, 3, 3, 3, 4][i.battleFieldReport.reports[0].battle_infos[n].elf.star - 1]
-            para["bg1"]=i.battleFieldReport.reports[0].battle_infos[n].lineup[0].avatar_background_path
-            para["bg2"]=i.battleFieldReport.reports[0].battle_infos[n].lineup[1].avatar_background_path
-            para["bg3"]=i.battleFieldReport.reports[0].battle_infos[n].lineup[2].avatar_background_path 
-            para["icon1"]=i.battleFieldReport.reports[0].battle_infos[n].lineup[0].icon_path
-            para["icon2"]=i.battleFieldReport.reports[0].battle_infos[n].lineup[1].icon_path
-            para["icon3"]=i.battleFieldReport.reports[0].battle_infos[n].lineup[2].icon_path     
-            para["elf"]=i.battleFieldReport.reports[0].battle_infos[n].elf.avatar
-            para["boss"]=i.battleFieldReport.reports[0].battle_infos[n].boss.avatar
+            para["bossRank"]=i.newAbyssReport.reports[0].rank
+            para["bossCup"]=i.newAbyssReport.reports[0].cup_number
+            para["settledCupNumber"]=i.newAbyssReport.reports[0].settled_cup_number
+            para["level"]=ItemTrans.abyss_level(i.index.stats.new_abyss.level)
+            para["score"]=i.newAbyssReport.reports[0].score
+            para["star1"]=["b", "a", "s", "ss", "sss"][i.newAbyssReport.reports[0].lineup[0].star - 1]
+            para["star2"]=["b", "a", "s", "ss", "sss"][i.newAbyssReport.reports[0].lineup[1].star - 1]
+            para["star3"]=["b", "a", "s", "ss", "sss"][i.newAbyssReport.reports[0].lineup[2].star - 1]
+            para["star4"]=[1, 2, 2, 3, 3, 3, 4][i.newAbyssReport.reports[0].elf.star - 1]
+            para["bg1"]=i.newAbyssReport.reports[0].lineup[0].avatar_background_path
+            para["bg2"]=i.newAbyssReport.reports[0].lineup[1].avatar_background_path
+            para["bg3"]=i.newAbyssReport.reports[0].lineup[2].avatar_background_path 
+            para["icon1"]=i.newAbyssReport.reports[0].lineup[0].icon_path
+            para["icon2"]=i.newAbyssReport.reports[0].lineup[1].icon_path
+            para["icon3"]=i.newAbyssReport.reports[0].lineup[2].icon_path     
+            para["elf"]=i.newAbyssReport.reports[0].elf.avatar
+            para["boss"]=i.newAbyssReport.reports[0].boss.avatar
+            para["change"], para["color"]=get_rank_change(group_id, i.index.role.role_id, rankNo, paraTotal["time_second"], rank_data, type=2)
             finalRankBoss += templateRankBoss.format(**para)
             rankNo += 1
-            if rankNo > bossCount:
+            if rankNo > totalCount:
                 break
-        paraTotal[f"rankBoss{n+1}"] = finalRankBoss
-        '''
+        paraTotal[f"rankBoss"] = finalRankBoss
+
         #汇总
         template = open(os.path.join(os.path.dirname(__file__), "template_abyss.html"), "r", encoding="utf8").read()
         html=template.format(**paraTotal)
         pic = await html_to_pic(html=html, wait=5, template_path= f"file://{os.path.dirname(__file__)}", no_viewport=True)
         #写排行图片
-        with open(os.path.join(os.path.dirname(__file__), f'image/war_{group_id}_{region}_{paraTotal["time_second"]}.png'), "ab") as f:
+        with open(os.path.join(os.path.dirname(__file__), f'image/abyss_{group_id}_{region}_{paraTotal["time_second"]}.png'), "ab") as f:
             f.write(pic)
         #写rank数据
         save_data(rank_data)
