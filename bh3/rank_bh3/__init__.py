@@ -2,7 +2,7 @@
 Author: MobiusT
 Date: 2022-12-23 21:09:31
 LastEditors: MobiusT
-LastEditTime: 2023-02-10 21:33:16
+LastEditTime: 2023-02-10 21:43:44
 '''
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, MessageSegment, MessageEvent
@@ -205,6 +205,18 @@ async def getAbyssData(group_id: str):
 
     #读取配置文件
     totalCount = Config.get_config("rank_bh3", "SHOWCOUNTALL")
+    #获取rank数据
+    rank_data = load_data()
+    #清除原数据,避免因更新深渊时掉出榜单而导致出现多个重复名次
+    if str(group_id) in rank_data:
+        if "abyss_cup" in rank_data[str(group_id)]:
+            for rid in rank_data[str(group_id)]["abyss_cup"]:
+                if str(paraTotal["time_second"]) in rank_data[str(group_id)]["abyss_cup"][rid]:
+                    rank_data[str(group_id)]["abyss_cup"][rid].pop(str(paraTotal["time_second"]))
+        if "abyss_score" in rank_data[str(group_id)]:
+            for rid in rank_data[str(group_id)]["abyss_score"]:
+                if str(paraTotal["time_second"]) in rank_data[str(group_id)]["abyss_score"][rid]:
+                    rank_data[str(group_id)]["abyss_score"][rid].pop(str(paraTotal["time_second"]))
     for region in rank.keys():
         #总模板数据
         paraTotal={}
@@ -238,18 +250,7 @@ async def getAbyssData(group_id: str):
         #boss名称
         paraTotal[f"bossName"] = rank[region][0].newAbyssReport.reports[0].boss.name
 
-        #获取rank数据
-        rank_data = load_data()
-        #清除原数据,避免因更新深渊时掉出榜单而导致出现多个重复名次
-        if str(group_id) in rank_data:
-            if "abyss_cup" in rank_data[str(group_id)]:
-                for rid in rank_data[str(group_id)]["abyss_cup"]:
-                    if str(paraTotal["time_second"]) in rank_data[str(group_id)]["abyss_cup"][rid]:
-                        rank_data[str(group_id)]["abyss_cup"][rid].pop(str(paraTotal["time_second"]))
-            if "abyss_score" in rank_data[str(group_id)]:
-                for rid in rank_data[str(group_id)]["abyss_score"]:
-                    if str(paraTotal["time_second"]) in rank_data[str(group_id)]["abyss_score"][rid]:
-                        rank_data[str(group_id)]["abyss_score"][rid].pop(str(paraTotal["time_second"]))
+       
 
         #总杯数
         rank[region].sort(key=lambda x: x.index.stats.new_abyss.cup_number, reverse=True)
@@ -295,17 +296,36 @@ async def getAbyssData(group_id: str):
             para["settledCupNumber"]=i.newAbyssReport.reports[0].settled_cup_number
             para["level"]=ItemTrans.abyss_level(i.index.stats.new_abyss.level)
             para["score"]=i.newAbyssReport.reports[0].score
-            para["star1"]=["b", "a", "s", "ss", "sss"][i.newAbyssReport.reports[0].lineup[0].star - 1]
-            para["star2"]=["b", "a", "s", "ss", "sss"][i.newAbyssReport.reports[0].lineup[1].star - 1]
-            para["star3"]=["b", "a", "s", "ss", "sss"][i.newAbyssReport.reports[0].lineup[2].star - 1]
-            para["star4"]=[1, 2, 2, 3, 3, 3, 4][i.newAbyssReport.reports[0].elf.star - 1]
-            para["bg1"]=i.newAbyssReport.reports[0].lineup[0].avatar_background_path
-            para["bg2"]=i.newAbyssReport.reports[0].lineup[1].avatar_background_path
-            para["bg3"]=i.newAbyssReport.reports[0].lineup[2].avatar_background_path 
-            para["icon1"]=i.newAbyssReport.reports[0].lineup[0].icon_path
-            para["icon2"]=i.newAbyssReport.reports[0].lineup[1].icon_path
-            para["icon3"]=i.newAbyssReport.reports[0].lineup[2].icon_path     
-            para["elf"]=i.newAbyssReport.reports[0].elf.avatar
+            if len(i.newAbyssReport.reports[0].lineup) >= 1:
+                para["star1"]=["b", "a", "s", "ss", "sss"][i.newAbyssReport.reports[0].lineup[0].star - 1]
+                para["bg1"]=i.newAbyssReport.reports[0].lineup[0].avatar_background_path
+                para["icon1"]=i.newAbyssReport.reports[0].lineup[0].icon_path
+            else:
+                para["star1"]=""
+                para["bg1"]=""
+                para["icon1"]=""
+            if len(i.newAbyssReport.reports[0].lineup) >= 2:
+                para["star2"]=["b", "a", "s", "ss", "sss"][i.newAbyssReport.reports[0].lineup[1].star - 1]
+                para["bg2"]=i.newAbyssReport.reports[0].lineup[1].avatar_background_path
+                para["icon2"]=i.newAbyssReport.reports[0].lineup[1].icon_path
+            else:
+                para["star2"]=""
+                para["bg2"]=""
+                para["icon2"]=""
+            if len(i.newAbyssReport.reports[0].lineup) >= 3: 
+                para["star3"]=["b", "a", "s", "ss", "sss"][i.newAbyssReport.reports[0].lineup[2].star - 1]
+                para["bg3"]=i.newAbyssReport.reports[0].lineup[2].avatar_background_path 
+                para["icon3"]=i.newAbyssReport.reports[0].lineup[2].icon_path
+            else:
+                para["star3"]=""
+                para["bg3"]=""
+                para["icon3"]=""
+            if i.newAbyssReport.reports[0].elf:
+                para["star4"]=[1, 2, 2, 3, 3, 3, 4][i.newAbyssReport.reports[0].elf.star - 1]
+                para["elf"]=i.newAbyssReport.reports[0].elf.avatar
+            else:
+                para["star4"]=""
+                para["elf"]=""
             para["boss"]=i.newAbyssReport.reports[0].boss.avatar
             para["change"], para["color"]=get_rank_change(group_id, i.index.role.role_id, rankNo, paraTotal["time_second"], rank_data, type=2)
             finalRankBoss += templateRankBoss.format(**para)
