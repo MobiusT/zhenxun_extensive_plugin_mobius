@@ -2,7 +2,7 @@
 Author: MobiusT
 Date: 2022-12-23 21:09:31
 LastEditors: MobiusT
-LastEditTime: 2023-02-10 21:50:31
+LastEditTime: 2023-02-10 22:08:34
 '''
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, MessageSegment, MessageEvent
@@ -301,31 +301,31 @@ async def getAbyssData(group_id: str):
                 para["bg1"]=i.newAbyssReport.reports[0].lineup[0].avatar_background_path
                 para["icon1"]=i.newAbyssReport.reports[0].lineup[0].icon_path
             else:
-                para["star1"]=""
-                para["bg1"]=""
-                para["icon1"]=""
+                para["star1"]="None"
+                para["bg1"]="../assets/None.png"
+                para["icon1"]="../assets/None.png"
             if len(i.newAbyssReport.reports[0].lineup) >= 2:
                 para["star2"]=["b", "a", "s", "ss", "sss"][i.newAbyssReport.reports[0].lineup[1].star - 1]
                 para["bg2"]=i.newAbyssReport.reports[0].lineup[1].avatar_background_path
                 para["icon2"]=i.newAbyssReport.reports[0].lineup[1].icon_path
             else:
-                para["star2"]=""
-                para["bg2"]=""
-                para["icon2"]=""
+                para["star2"]="None"
+                para["bg2"]="../assets/None.png"
+                para["icon2"]="../assets/None.png"
             if len(i.newAbyssReport.reports[0].lineup) >= 3: 
                 para["star3"]=["b", "a", "s", "ss", "sss"][i.newAbyssReport.reports[0].lineup[2].star - 1]
                 para["bg3"]=i.newAbyssReport.reports[0].lineup[2].avatar_background_path 
                 para["icon3"]=i.newAbyssReport.reports[0].lineup[2].icon_path
             else:
-                para["star3"]=""
-                para["bg3"]=""
-                para["icon3"]=""
+                para["star3"]="None"
+                para["bg3"]="../assets/None.png"
+                para["icon3"]="../assets/None.png"
             if i.newAbyssReport.reports[0].elf:
                 para["star4"]=[1, 2, 2, 3, 3, 3, 4][i.newAbyssReport.reports[0].elf.star - 1]
                 para["elf"]=i.newAbyssReport.reports[0].elf.avatar
             else:
-                para["star4"]=""
-                para["elf"]=""
+                para["star4"]="None"
+                para["elf"]="../assets/None.png"
             para["boss"]=i.newAbyssReport.reports[0].boss.avatar
             para["change"], para["color"]=get_rank_change(group_id, i.index.role.role_id, rankNo, paraTotal["time_second"], rank_data, type=2)
             finalRankBoss += templateRankBoss.format(**para)
