@@ -2,7 +2,7 @@
 Author: MobiusT
 Date: 2022-12-23 21:09:31
 LastEditors: MobiusT
-LastEditTime: 2023-02-11 14:35:40
+LastEditTime: 2023-02-11 14:39:03
 '''
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, MessageSegment, MessageEvent
@@ -214,7 +214,6 @@ async def getAbyssData(group_id: str):
             continue
 
         rank[region_id].append(ind)
-        print(ind)
         time.sleep(1)
 
     #读取配置文件
