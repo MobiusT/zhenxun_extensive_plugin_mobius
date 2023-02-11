@@ -2,7 +2,7 @@
 Author: MobiusT
 Date: 2022-12-23 21:09:31
 LastEditors: MobiusT
-LastEditTime: 2023-02-11 14:20:55
+LastEditTime: 2023-02-11 14:35:40
 '''
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, MessageSegment, MessageEvent
@@ -214,6 +214,7 @@ async def getAbyssData(group_id: str):
             continue
 
         rank[region_id].append(ind)
+        print(ind)
         time.sleep(1)
 
     #读取配置文件
@@ -298,7 +299,7 @@ async def getAbyssData(group_id: str):
         #boss
         templateRankBoss = open(os.path.join(os.path.dirname(__file__), "template_abyss_rank_boss.html"), "r", encoding="utf8").read()
         finalRankBoss=""
-        rank[region].sort(key=lambda x: (x.newAbyssReport.reports[0].settled_level, x.newAbyssReport.reports[0].score), reverse=True)
+        rank[region].sort(key=lambda x: (x.newAbyssReport.reports[0].level, x.newAbyssReport.reports[0].score), reverse=True)
         rankNo=1
         for i in rank[region]:
             para["rank"] = rankNo
@@ -307,7 +308,7 @@ async def getAbyssData(group_id: str):
             para["bossRank"]=i.newAbyssReport.reports[0].rank
             para["bossCup"]=i.newAbyssReport.reports[0].cup_number
             para["settledCupNumber"]=i.newAbyssReport.reports[0].settled_cup_number
-            para["level"]=ItemTrans.abyss_level(i.index.stats.new_abyss.level)
+            para["level"]=ItemTrans.abyss_level(i.newAbyssReport.reports[0].level)
             para["score"]=i.newAbyssReport.reports[0].score
             if len(i.newAbyssReport.reports[0].lineup) >= 1:
                 para["star1"]=["b", "a", "s", "ss", "sss"][i.newAbyssReport.reports[0].lineup[0].star - 1]
