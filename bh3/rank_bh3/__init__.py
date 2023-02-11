@@ -2,7 +2,7 @@
 Author: MobiusT
 Date: 2022-12-23 21:09:31
 LastEditors: MobiusT
-LastEditTime: 2023-02-10 22:08:34
+LastEditTime: 2023-02-11 14:20:55
 '''
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, MessageSegment, MessageEvent
@@ -11,7 +11,7 @@ from services.log import logger
 from models.group_member_info import GroupInfoUser
 from configs.config import Config
 from utils.message_builder import image, custom_forward_msg
-from utils.utils import get_bot, scheduler
+from utils.utils import get_bot, scheduler, get_message_at
 from ..modules.database import DB
 from ..modules.image_handle import DrawIndex
 from ..modules.query import InfoError, GetInfo
@@ -27,7 +27,7 @@ usage：
     获取群内上一期终极区战场/深渊排行信息
     指令：
         崩坏三战场排行
-        崩坏三深渊排行[全部/all]
+        崩坏三深渊排行[全部/all] [服务器] [@] #可选参数：[全部/all]全部排行  [服务器]对应服务器的排行  [@]at的人绑定的角色所在服务器
         崩坏三战场排行更新
         崩坏三深渊排行更新
         
@@ -101,13 +101,26 @@ async def _(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
             msgs.append(image(image_path))
         await bot.send_group_forward_msg(group_id=event.group_id, messages=custom_forward_msg(msgs, bot.self_id))
         return
-    qid_db = DB("uid.sqlite", tablename="qid_uid")
-    region_db = DB("uid.sqlite", tablename="uid_region")
-    try:#获取绑定的角色信息
-        role_id = qid_db.get_uid_by_qid(str(event.user_id))
-        region_id = region_db.get_region(role_id)
-    except KeyError:
-        await abyss.finish("请先绑定uid，\n例:崩坏三绑定114514官服")
+    if msg:    
+        #查找服务器id
+        try:
+            region_id = ItemTrans.server2id(msg)
+        except InfoError as e:
+            await abyss.finish(str(e))
+    else:
+        #at 绑定的角色
+        ats =  get_message_at(event.json())
+        if len(ats) > 0:
+            qid=ats[0]
+        else:
+            qid=str(event.user_id)
+        qid_db = DB("uid.sqlite", tablename="qid_uid")
+        region_db = DB("uid.sqlite", tablename="uid_region")
+        try:#获取绑定的角色信息
+            role_id = qid_db.get_uid_by_qid(qid)
+            region_id = region_db.get_region(role_id)
+        except KeyError:
+            await abyss.finish("请先绑定uid，\n例:崩坏三绑定114514官服")
     
     #获取深渊排行    
     image_path = os.path.join(os.path.dirname(__file__), f'image/abyss_{group_id}_{region_id}_{last_cutoff_day(is_abyss = True)}.png')
