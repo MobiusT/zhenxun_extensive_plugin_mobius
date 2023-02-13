@@ -94,7 +94,7 @@ async def _(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
     if  msg in ["all", "全部"]:
         msgs=[]
         for r in REGION_LIST:
-            image_path = os.path.join(os.path.dirname(__file__), f'image/abyss_{group_id}_{r}_{last_cutoff_day(is_abyss = True)}.png')
+            image_path = os.path.join(os.path.dirname(__file__), f'image/abyss_{group_id}_{r}_{lastest_cutoff_day(is_abyss = True)}.png')
             if not os.path.exists(image_path):
                 await abyss.send(f'正在更新崩坏三深渊排行,耗时较久请耐心等待')  
                 await getAbyssData(group_id)
@@ -123,7 +123,7 @@ async def _(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
             await abyss.finish("请先绑定uid，\n例:崩坏三绑定114514官服")
     
     #获取深渊排行    
-    image_path = os.path.join(os.path.dirname(__file__), f'image/abyss_{group_id}_{region_id}_{last_cutoff_day(is_abyss = True)}.png')
+    image_path = os.path.join(os.path.dirname(__file__), f'image/abyss_{group_id}_{region_id}_{lastest_cutoff_day(is_abyss = True)}.png')
     if not os.path.exists(image_path):
         await abyss.send(f'正在更新崩坏三深渊排行,耗时较久请耐心等待')  
         await getAbyssData(group_id)
@@ -163,7 +163,7 @@ async def _():
 async def getAbyssData(group_id: str):      
     # 删除深渊排行 
     for r in REGION_LIST:
-        image_path = os.path.join(os.path.dirname(__file__), f'image/abyss_{group_id}_{r}_{last_cutoff_day(is_abyss = True)}.png')
+        image_path = os.path.join(os.path.dirname(__file__), f'image/abyss_{group_id}_{r}_{lastest_cutoff_day(is_abyss = True)}.png')
         if os.path.exists(image_path):
             try:
                 os.unlink(image_path)
@@ -209,7 +209,7 @@ async def getAbyssData(group_id: str):
             logger.info(f"群{group_id}成员{qid}未打深渊")
             continue
         #跳过非上周结算
-        if str(last_cutoff_day(is_abyss = True))!=str(abyss[0].updated_time_second.astimezone().date()):
+        if str(lastest_cutoff_day(is_abyss = True))!=str(abyss[0].updated_time_second.astimezone().date()):
             logger.info(f"群{group_id}成员{qid}上期未打深渊")
             continue
 
@@ -224,12 +224,12 @@ async def getAbyssData(group_id: str):
     if str(group_id) in rank_data:
         if "abyss_cup" in rank_data[str(group_id)]:
             for rid in rank_data[str(group_id)]["abyss_cup"]:
-                if str(last_cutoff_day(is_abyss = True)) in rank_data[str(group_id)]["abyss_cup"][rid]:
-                    rank_data[str(group_id)]["abyss_cup"][rid].pop(str(last_cutoff_day(is_abyss = True)))
+                if str(lastest_cutoff_day(is_abyss = True)) in rank_data[str(group_id)]["abyss_cup"][rid]:
+                    rank_data[str(group_id)]["abyss_cup"][rid].pop(str(lastest_cutoff_day(is_abyss = True)))
         if "abyss_score" in rank_data[str(group_id)]:
             for rid in rank_data[str(group_id)]["abyss_score"]:
-                if str(last_cutoff_day(is_abyss = True)) in rank_data[str(group_id)]["abyss_score"][rid]:
-                    rank_data[str(group_id)]["abyss_score"][rid].pop(str(last_cutoff_day(is_abyss = True)))
+                if str(lastest_cutoff_day(is_abyss = True)) in rank_data[str(group_id)]["abyss_score"][rid]:
+                    rank_data[str(group_id)]["abyss_score"][rid].pop(str(lastest_cutoff_day(is_abyss = True)))
     for region in rank.keys():
         #总模板数据
         paraTotal={}
@@ -254,7 +254,7 @@ async def getAbyssData(group_id: str):
             html=template.format(**paraTotal)
             pic = await html_to_pic(html=html, wait=5, template_path= f"file://{os.path.dirname(__file__)}", no_viewport=True)
             #写文件
-            with open(os.path.join(os.path.dirname(__file__), f'image/abyss_{group_id}_{region}_{last_cutoff_day(is_abyss=True)}.png'), "ab") as f:
+            with open(os.path.join(os.path.dirname(__file__), f'image/abyss_{group_id}_{region}_{lastest_cutoff_day(is_abyss=True)}.png'), "ab") as f:
                 f.write(pic)
             continue
             
@@ -368,7 +368,7 @@ async def _(event: GroupMessageEvent):
     #获取群号 
     group_id = event.group_id
     #获取战场排行    
-    image_path = os.path.join(os.path.dirname(__file__), f'image/war_{group_id}_{last_cutoff_day()}.png')
+    image_path = os.path.join(os.path.dirname(__file__), f'image/war_{group_id}_{lastest_cutoff_day()}.png')
     if not os.path.exists(image_path):
         await battle_field.send(f'正在更新崩坏三战场排行,耗时较久请耐心等待')  
         await getBattleData(group_id)
@@ -407,7 +407,7 @@ async def _():
 
 async def getBattleData(group_id: str):      
     #删除战场排行 
-    image_path = os.path.join(os.path.dirname(__file__), f'image/war_{group_id}_{last_cutoff_day()}.png')
+    image_path = os.path.join(os.path.dirname(__file__), f'image/war_{group_id}_{lastest_cutoff_day()}.png')
     if os.path.exists(image_path):
         try:
             os.unlink(image_path)
@@ -447,7 +447,7 @@ async def getBattleData(group_id: str):
             continue
         bfr = ind.battleFieldReport.reports[0]
         #跳过非上周结算
-        if str(last_cutoff_day())!=str(bfr.time_second.astimezone().date()):
+        if str(lastest_cutoff_day())!=str(bfr.time_second.astimezone().date()):
             logger.info(f"群{group_id}成员{qid}上周未打战场")
             continue
         #跳过没全打boss
@@ -485,7 +485,7 @@ async def getBattleData(group_id: str):
         html=template.format(**paraTotal)
         pic = await html_to_pic(html=html, wait=5, template_path= f"file://{os.path.dirname(__file__)}", no_viewport=True)
         #写文件
-        with open(os.path.join(os.path.dirname(__file__), f'image/war_{group_id}_{last_cutoff_day()}.png'), "ab") as f:
+        with open(os.path.join(os.path.dirname(__file__), f'image/war_{group_id}_{lastest_cutoff_day()}.png'), "ab") as f:
             f.write(pic)
         return
         
@@ -576,15 +576,23 @@ async def getBattleData(group_id: str):
     save_data(rank_data)
 
 #最新一期结算时间
-def last_cutoff_day(today = datetime.now(), is_abyss = False):
+def lastest_cutoff_day(today = datetime.now(), is_abyss = False):
     if is_abyss and today.weekday() >= 4:
         return datetime.strftime(today - timedelta(today.weekday()-2), "%Y-%m-%d")
-    else:
+    elif is_abyss:
         return datetime.strftime(today - timedelta(today.weekday()+1), "%Y-%m-%d")
+    else:
+        return datetime.strftime(today - timedelta(today.weekday()), "%Y-%m-%d")
 
-#上周一
-def last_monday(today = datetime.now()):
-    return (today - timedelta(days=7)).strftime('%Y-%m-%d')
+#上一期结算时间
+def last_cutoff_day(today = datetime.now(), is_abyss = False):
+    if is_abyss:
+        if today.weekday() >= 4:
+            return datetime.strftime(today - timedelta(today.weekday()+1), "%Y-%m-%d")
+        else:
+            return datetime.strftime(today - timedelta(today.weekday()+5), "%Y-%m-%d")
+    else:
+        return (today - timedelta(days=7)).strftime('%Y-%m-%d')
     
 def get_rank_change(group_id, role_id, rank, time_second, data, type = 0):
     group_id = str(group_id)
@@ -608,7 +616,7 @@ def get_rank_change(group_id, role_id, rank, time_second, data, type = 0):
         data[group_id] = {rank_type: {role_id: {time_second_str: rank}}}
     #获取上周数据
     try:
-        last_rank = data[group_id][rank_type][role_id][f'{last_monday(time_second)}']
+        last_rank = data[group_id][rank_type][role_id][f'{last_cutoff_day(time_second, is_abyss=False if type == 0 else True)}']
     except:
         #新上榜
         return "new", "red"
