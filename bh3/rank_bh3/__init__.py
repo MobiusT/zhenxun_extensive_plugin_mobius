@@ -438,8 +438,7 @@ async def getBattleData(group_id: str):
         spider = GetInfo(server_id=region_id, role_id=role_id)
         try:
             ind = await spider.part()
-            ind = DrawIndex(**ind)            
-            print(ind)
+            ind = DrawIndex(**ind)
         except InfoError as e:
             continue
         #跳过非终级区
@@ -581,7 +580,7 @@ def last_cutoff_day(today = datetime.now(), is_abyss = False):
     if is_abyss and today.weekday() >= 4:
         return datetime.strftime(today - timedelta(today.weekday()-2), "%Y-%m-%d")
     else:
-        return datetime.strftime(today - timedelta(today.weekday()), "%Y-%m-%d")
+        return datetime.strftime(today - timedelta(today.weekday()+1), "%Y-%m-%d")
 
 #上周一
 def last_monday(today = datetime.now()):
