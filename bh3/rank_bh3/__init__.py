@@ -587,10 +587,7 @@ def lastest_cutoff_day(today = datetime.now(), is_abyss = False):
 #上一期结算时间
 def last_cutoff_day(today = datetime.now(), is_abyss = False):
     if is_abyss:
-        if today.weekday() >= 4:
-            return datetime.strftime(today - timedelta(today.weekday()+1), "%Y-%m-%d")
-        else:
-            return datetime.strftime(today - timedelta(today.weekday()+5), "%Y-%m-%d")
+        return lastest_cutoff_day(today, is_abyss)
     else:
         return (today - timedelta(days=7)).strftime('%Y-%m-%d')
     
@@ -617,7 +614,9 @@ def get_rank_change(group_id, role_id, rank, time_second, data, type = 0):
     #获取上周数据
     try:
         last_rank = data[group_id][rank_type][role_id][f'{last_cutoff_day(time_second, is_abyss=False if type == 0 else True)}']
-    except:
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
         #新上榜
         return "new", "red"
     #名次变化
