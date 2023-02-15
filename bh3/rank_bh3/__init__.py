@@ -547,18 +547,37 @@ async def getBattleData(group_id: str):
             para["nickname"]=i.index.role.nickname
             para["server"]=ItemTrans.id2server(i.index.role.region)
             para["score"]=i.battleFieldReport.reports[0].battle_infos[n].score
-            para["star1"]=["b", "a", "s", "ss", "sss"][i.battleFieldReport.reports[0].battle_infos[n].lineup[0].star - 1]
-            para["star2"]=["b", "a", "s", "ss", "sss"][i.battleFieldReport.reports[0].battle_infos[n].lineup[1].star - 1]
-            para["star3"]=["b", "a", "s", "ss", "sss"][i.battleFieldReport.reports[0].battle_infos[n].lineup[2].star - 1]
-            para["star4"]=[1, 2, 2, 3, 3, 3, 4][i.battleFieldReport.reports[0].battle_infos[n].elf.star - 1]
-            para["bg1"]=i.battleFieldReport.reports[0].battle_infos[n].lineup[0].avatar_background_path
-            para["bg2"]=i.battleFieldReport.reports[0].battle_infos[n].lineup[1].avatar_background_path
-            para["bg3"]=i.battleFieldReport.reports[0].battle_infos[n].lineup[2].avatar_background_path 
-            para["icon1"]=i.battleFieldReport.reports[0].battle_infos[n].lineup[0].icon_path
-            para["icon2"]=i.battleFieldReport.reports[0].battle_infos[n].lineup[1].icon_path
-            para["icon3"]=i.battleFieldReport.reports[0].battle_infos[n].lineup[2].icon_path     
-            para["elf"]=i.battleFieldReport.reports[0].battle_infos[n].elf.avatar
             para["boss"]=i.battleFieldReport.reports[0].battle_infos[n].boss.avatar
+            if len(i.battleFieldReport.reports[0].battle_infos[n].lineup) >= 1:
+                para["star1"]=["b", "a", "s", "ss", "sss"][i.battleFieldReport.reports[0].battle_infos[n].lineup[0].star - 1]
+                para["bg1"]=i.battleFieldReport.reports[0].battle_infos[n].lineup[0].avatar_background_path
+                para["icon1"]=i.battleFieldReport.reports[0].battle_infos[n].lineup[0].icon_path
+            else:
+                para["star1"]="None"
+                para["bg1"]="../assets/None.png"
+                para["icon1"]="../assets/None.png"
+            if len(i.battleFieldReport.reports[0].battle_infos[n].lineup) >= 2:
+                para["star2"]=["b", "a", "s", "ss", "sss"][i.battleFieldReport.reports[0].battle_infos[n].lineup[1].star - 1]
+                para["bg2"]=i.battleFieldReport.reports[0].battle_infos[n].lineup[1].avatar_background_path
+                para["icon2"]=i.battleFieldReport.reports[0].battle_infos[n].lineup[1].icon_path
+            else:
+                para["star2"]="None"
+                para["bg2"]="../assets/None.png"
+                para["icon2"]="../assets/None.png"
+            if len(i.battleFieldReport.reports[0].battle_infos[n].lineup) >= 3:
+                para["star3"]=["b", "a", "s", "ss", "sss"][i.battleFieldReport.reports[0].battle_infos[n].lineup[2].star - 1]
+                para["bg3"]=i.battleFieldReport.reports[0].battle_infos[n].lineup[2].avatar_background_path 
+                para["icon3"]=i.battleFieldReport.reports[0].battle_infos[n].lineup[2].icon_path     
+            else:
+                para["star3"]="None"
+                para["bg3"]="../assets/None.png"
+                para["icon3"]="../assets/None.png"
+            if i.battleFieldReport.reports[0].battle_infos[n].elf:     
+                para["star4"]=[1, 2, 2, 3, 3, 3, 4][i.battleFieldReport.reports[0].battle_infos[n].elf.star - 1]
+                para["elf"]=i.battleFieldReport.reports[0].battle_infos[n].elf.avatar
+            else:
+                para["star4"]="None"
+                para["elf"]="../assets/None.png"
             finalRankBoss += templateRankBoss.format(**para)
             rankNo += 1
             if rankNo > bossCount:
@@ -614,9 +633,7 @@ def get_rank_change(group_id, role_id, rank, time_second, data, type = 0):
     #获取上周数据
     try:
         last_rank = data[group_id][rank_type][role_id][f'{last_cutoff_day(time_second, is_abyss=False if type == 0 else True)}']
-    except Exception as e:
-        import traceback
-        print(traceback.format_exc())
+    except:
         #新上榜
         return "new", "red"
     #名次变化
