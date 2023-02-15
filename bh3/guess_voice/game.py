@@ -7,6 +7,7 @@ from shutil import copy
 from apscheduler.triggers.date import DateTrigger
 from utils.utils import get_bot,  scheduler
 from nonebot.adapters.onebot.v11 import MessageSegment
+from services.log import logger
 
 
 # from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -63,7 +64,7 @@ class GameSession:
             max_instances=1,
         )
         record_path = f"file:///{os.path.join(os.path.dirname(os.path.dirname(__file__)),'assets/record',self.voice['voice_path'])}"
-        print(self.answer)
+        logger.info(f'猜语音答案：{self.answer}')
         bot = get_bot()
         await bot.send_group_msg(
             group_id=self.group_id, message=f"即将发送一段崩坏3语音，将在{duration}s后公布答案。"
