@@ -596,7 +596,7 @@ async def getBattleData(group_id: str):
 
 #最新一期结算时间
 def lastest_cutoff_day(today = datetime.now(), is_abyss = False):
-    if is_abyss and today.weekday() >= 4:
+    if is_abyss and today.weekday() >= 3:
         return datetime.strftime(today - timedelta(today.weekday()-2), "%Y-%m-%d")
     elif is_abyss:
         return datetime.strftime(today - timedelta(today.weekday()+1), "%Y-%m-%d")
