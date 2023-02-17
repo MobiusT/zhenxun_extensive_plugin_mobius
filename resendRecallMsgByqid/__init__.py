@@ -82,7 +82,7 @@ async def _(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
         except Exception:
             await addListenList.send(f"{qid}不是可用的qq号")
     #获取at
-    ats =  get_message_at(event.json())
+    ats = get_message_at(event.json())
     if not len(ats)==0 :
         for qidAts in ats:
             qidList.append(str(qidAts))
