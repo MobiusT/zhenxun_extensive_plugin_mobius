@@ -357,3 +357,9 @@ class result(BaseModel):
     addons:str
     sign_response:Optional[dict]
     end:str
+
+'''崩三排行用，仅查询index及深渊战场，减少网络开销'''
+class RankInfo(BaseModel):
+    index: Index
+    newAbyssReport: Optional[Abyss]
+    battleFieldReport: Optional[BattleField]

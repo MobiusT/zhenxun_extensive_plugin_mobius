@@ -157,6 +157,20 @@ class GetInfo(MysApi):
                 info.update({item: data["data"]})
         return info
 
+    async def rank(self, is_abyss = False):
+        """仅查询数据总览、深渊、战场"""
+        api = [self.index]
+        if is_abyss:
+            api.append(self.newAbyss)
+        else:
+            api.append(self.battleField)
+        info = {}
+        for url in api:
+            item, data = await self.fetch(url)
+            info.update({item: data["data"]})
+        return info
+
+
     @classmethod
     def gen_header(cls, ds: str, cookie: str):
         headers = {
