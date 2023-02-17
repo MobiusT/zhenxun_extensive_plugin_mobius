@@ -2,7 +2,7 @@
 Author: MobiusT
 Date: 2022-12-23 21:09:31
 LastEditors: MobiusT
-LastEditTime: 2023-02-11 14:39:03
+LastEditTime: 2023-02-17 21:18:33
 '''
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, MessageSegment, MessageEvent
@@ -13,9 +13,9 @@ from configs.config import Config
 from utils.message_builder import image, custom_forward_msg
 from utils.utils import get_bot, scheduler, get_message_at
 from ..modules.database import DB
-from ..modules.image_handle import DrawIndex
 from ..modules.query import InfoError, GetInfo
 from ..modules.util import ItemTrans
+from ..modules.mytyping import RankInfo
 from nonebot_plugin_htmlrender import html_to_pic
 from datetime import datetime, timedelta
 import time, os, re, json
@@ -195,8 +195,8 @@ async def getAbyssData(group_id: str):
         #查询角色
         spider = GetInfo(server_id=region_id, role_id=role_id)
         try:
-            ind = await spider.part()
-            ind = DrawIndex(**ind)            
+            ind = await spider.rank(is_abyss=True)
+            ind = RankInfo(**ind)            
         except InfoError as e:
             continue
         #跳过非终级区
@@ -437,8 +437,8 @@ async def getBattleData(group_id: str):
         #查询角色
         spider = GetInfo(server_id=region_id, role_id=role_id)
         try:
-            ind = await spider.part()
-            ind = DrawIndex(**ind)
+            ind = await spider.rank()
+            ind = RankInfo(**ind)
         except InfoError as e:
             continue
         #跳过非终级区
