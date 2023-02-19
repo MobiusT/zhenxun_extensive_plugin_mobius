@@ -1,8 +1,14 @@
+'''
+Author: MobiusT
+Date: 2023-02-13 20:00:21
+LastEditors: MobiusT
+LastEditTime: 2023-02-19 14:50:02
+'''
 from utils.utils import get_message_at
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import GroupMessageEvent, Message
 from services.log import logger
-from services.db_context import db
+from services.db_context import TestSQL
 from utils.message_builder import at
 from configs.path_config import IMAGE_PATH
 from nonebot.permission import SUPERUSER
@@ -42,8 +48,8 @@ async def _(event: GroupMessageEvent,):
         ats=list(set(ats))
     mes=''
     for qq in ats :
-        query = db.text(f'update sign_group_users set checkin_count = (checkin_count-1) , checkin_time_last = (checkin_time_last+ interval \'-1 Day\') where group_id=\'{event.group_id}\' and user_qq = (\'{qq}\')')
-        row = await db.first(query)
+        sql = f'update sign_group_users set checkin_count = (checkin_count-1) , checkin_time_last = (checkin_time_last+ interval \'-1 Day\') where group_id=\'{event.group_id}\' and user_qq = (\'{qq}\')'
+        row = await TestSQL.raw(sql)
         if row == 0 :
             mes=mes+f'{at(qq)}签退失败;'
         else :
