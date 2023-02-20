@@ -47,14 +47,12 @@ __plugin_settings__ = {
     "limit_superuser": False,
     "cmd": ["github订阅", "gb订阅", "添加github", "删除github", "查看github"],
 }
-__plugin_configs__ = {
-    "GROUP_GITHUB_SUB_LEVEL": {
-        "value": 5,
-        "help": "群内github订阅需要管理的权限",
-        "default_value": 5,
-    },
-}
-
+Config.add_plugin_config(
+    "github_sub",
+    "GROUP_GITHUB_SUB_LEVEL",
+    5,
+    help_="群内github订阅需要管理的权限"
+)
 Config.add_plugin_config(
     "github_sub",
     "GITHUB_TOKEN",
@@ -187,8 +185,6 @@ async def _():
                 else:
                     await send_sub_msg(rst, sub, bot)
         except Exception as e:
-            import traceback
-            logger.info(traceback.format_exc())
             logger.error(f"github订阅推送发生错误 sub_url：{sub.sub_url if sub else 0} {type(e)}：{e}")
 
 
@@ -209,8 +205,6 @@ async def send_sub_msg(rst: str, sub: GitHubSub, bot: Bot):
                 else:
                     await bot.send_private_msg(user_id=int(x), message=Message(rst))
             except Exception as e:
-                import traceback
-                logger.info(traceback.format_exc())
                 logger.error(f"github订阅推送发生错误 sub_url：{sub.sub_url} {type(e)}：{e}")
 
 
@@ -237,6 +231,4 @@ async def send_sub_msg_list(rst_list: list, sub: GitHubSub, bot: Bot ):
                 else:
                     await bot.send_group_forward_msg(user_id=int(x), messages=mes_list)
             except Exception as e:
-                import traceback
-                logger.info(traceback.format_exc())
                 logger.error(f"github订阅推送发生错误 sub_url：{sub.sub_url} {type(e)}：{e}")

@@ -90,8 +90,8 @@ async def get_sub_status(sub_type: str, sub_url: str, etag=None):
                         logger.error("请设置 GitHub 用户名和 OAuth Token 以提高限制")
                 elif json_response["message"] == "Not Found":
                     logger.error(f"无法找到{sub_url}")
-        print(old_time)
-        print(datetime.strptime(json_response[0]['created_at'], '%Y-%m-%dT%H:%M:%SZ') + timedelta(hours=8))
+        if old_time.tzinfo:
+            old_time=old_time.replace(tzinfo=None) + timedelta(hours=8)
         json_response = [i for i in json_response if i['type'] != 'CreateEvent' and
                          old_time < datetime.strptime(i['created_at'], '%Y-%m-%dT%H:%M:%SZ') + timedelta(hours=8)]
         if json_response:

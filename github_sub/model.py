@@ -44,9 +44,6 @@ class GitHubSub(Model):
                         query.sub_users = query.sub_users + sub_user                        
                         await query.save(update_fields=["sub_users", ])
             else:
-                print(sub_url)
-                print(sub_type)
-                print(sub_user)
                 sub = await cls.create(
                         sub_url=sub_url, sub_type=sub_type, sub_users=sub_user
                     )
@@ -117,11 +114,11 @@ class GitHubSub(Model):
             :etag: 更新标签
         """
         try:
-            sub = await cls.filter(sub_url == sub_url).first()
+            sub = await cls.filter(sub_url = sub_url).first()
             if sub:
                 sub.update_time=update_time if update_time is not None else sub.update_time
                 sub.etag = etag if etag is not None else sub.etag
-                sub.save(update_fields=["sub_url", "update_time", ])
+                await sub.save(update_fields=["sub_url", "update_time", ])
                 return True
         except Exception as e:
             logger.info(f"github_sub 更新订阅错误 {type(e)}: {e}")
