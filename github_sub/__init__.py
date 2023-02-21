@@ -39,8 +39,8 @@ usage：
 """.strip()
 __plugin_des__ = "github订阅推送"
 __plugin_cmd__ = ["添加github ['用户'/'仓库'] [用户名/{owner/repo}]", "删除github [用户名/{owner/repo}]", "查看github"]
-__plugin_version__ = 0.4
-__plugin_author__ = "yajiwa"
+__plugin_version__ = 0.5
+__plugin_author__ = "yajiwa&MobiusT"
 __plugin_settings__ = {
     "level": 5,
     "default_status": True,
@@ -66,8 +66,8 @@ Config.add_plugin_config(
     help_="是否不推送Issue"
 )
 
-add_sub = on_command("添加github订阅", aliases={"添加github", "添加gb订阅"}, priority=5, permission=GROUP, block=True)
-del_sub = on_command("删除github订阅", aliases={"删除github", "删除gb订阅"}, priority=5, permission=GROUP, block=True)
+add_sub = on_command("添加github订阅", aliases={"添加github", "添加gb订阅", "添加gb"}, priority=5, permission=GROUP, block=True)
+del_sub = on_command("删除github订阅", aliases={"删除github", "删除gb订阅", "删除gb"}, priority=5, permission=GROUP, block=True)
 show_sub_info = on_command("查看github订阅", aliases={"查看github", "查看gb", "查看gb订阅"}, priority=5, block=True)
 
 driver: Driver = nonebot.get_driver()

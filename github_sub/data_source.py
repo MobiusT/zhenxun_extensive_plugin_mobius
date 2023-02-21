@@ -39,7 +39,8 @@ async def add_user_sub(sub_type: str, sub_url: str, sub_user: str) -> str:
         else:
             return f"订阅参数错误，格式为：owner/repo"
     try:
-        response = await get_github_api(sub_type, sub_url)
+        token = Config.get_config("github_sub", "GITHUB_TOKEN")
+        response = await get_github_api(sub_type, sub_url, token=token)
         if response.status_code == 403:
             return f"你无权访问该仓库{sub_url}"
         elif response.status_code == 404:
@@ -92,6 +93,7 @@ async def get_sub_status(sub_type: str, sub_url: str, etag=None):
                     logger.error(f"无法找到{sub_url}")
         if old_time.tzinfo:
             old_time=old_time.replace(tzinfo=None) + timedelta(hours=8)
+            await GitHubSub.update_column_datetime()
         json_response = [i for i in json_response if i['type'] != 'CreateEvent' and
                          old_time < datetime.strptime(i['created_at'], '%Y-%m-%dT%H:%M:%SZ') + timedelta(hours=8)]
         if json_response:

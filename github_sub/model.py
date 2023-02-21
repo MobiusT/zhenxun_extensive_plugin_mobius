@@ -141,3 +141,11 @@ class GitHubSub(Model):
             if x.sub_type == "repository":
                 repository_data.append(x)
         return user_data, repository_data
+    
+    @classmethod
+    async def update_column_datetime(cls):
+        """
+        说明：
+            调整表结构
+        """
+        await cls.raw('ALTER TABLE "github_sub" ALTER COLUMN "update_time" TYPE timestamp(6) USING "update_time"::timestamp(6)')
