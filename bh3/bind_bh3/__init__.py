@@ -270,7 +270,6 @@ async def get_cookie_token(game_token: dict):
     res = await AsyncHttpx.get(
         f"https://api-takumi.mihoyo.com/auth/api/getCookieAccountInfoByGameToken?game_token={game_token['token']}&account_id={game_token['uid']}")
     cookie_token_data = res.json()
-    logger.info("cookie_token_data:" + str(cookie_token_data))
     return cookie_token_data['data']['uid'], cookie_token_data['data']['cookie_token']
 
 # 检查登录状态
@@ -278,7 +277,6 @@ async def check_qrcode(qrcode_data: dict, ck_flag = True):
     send_msg = None
     try:
         status_data = await check_login(qrcode_data)
-        logger.info("status_data:" + str(status_data))
         if status_data['retcode'] != 0:
             send_msg = '绑定二维码已过期，请重新发送扫码绑定指令'
             qrcode_data_map.pop(qrcode_data["user_id"])
