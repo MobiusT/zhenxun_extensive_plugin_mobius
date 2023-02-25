@@ -2,7 +2,7 @@
  * @Author: MobiusT
  * @Date: 2022-11-03 21:30:42
  * @LastEditors: MobiusT
- * @LastEditTime: 2023-02-10 22:32:15
+ * @LastEditTime: 2023-02-25 19:32:55
 -->
 # zhenxun_extensive_plugin_mobius
 
@@ -62,5 +62,9 @@ ValueError: Operation on closed image
 下载[emoji字体](https://gitee.com/songboy/noto-emoji/tree/master/fonts),放到/usr/share/fonts下，加载字体后重启真寻
 
 ## 感谢
-[CRAZYShimakaze/genshin_role_info](https://github.com/CRAZYShimakaze/zhenxun_extensive_plugin/tree/main/genshin_role_info) : 源码参考（我是fw）
+
+[CRAZYShimakaze/genshin_role_info](https://github.com/CRAZYShimakaze/zhenxun_extensive_plugin/tree/main/genshin_role_info) : 源码参考
+
 [HibiKier/zhenxun_bot](https://github.com/HibiKier/zhenxun_bot) : 超好用的基于nonebot2的qq机器人
+
+[CMHopeSunshine/LittlePaimon](https://github.com/CMHopeSunshine/LittlePaimon) : 源码参考

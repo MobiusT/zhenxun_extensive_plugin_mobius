@@ -42,8 +42,11 @@ class NotBindError(Exception):
     msg = """
 * 这个插件需要获取账号cookie, 外泄有可能导致您的账号遭受损失, 请注意相关事项再进行绑定, 造成一切损失由用户自行承担
 * 修改密码可以直接使其失效
-
-   私聊发送！！
+   方法一：
+       崩坏三ck扫码  使用米游社扫码绑定ck（不可用扫码器）
+   方法二：
+       先通过原神绑定插件绑定原神cookie后，再输入 崩坏三ck同步
+   方法三：私聊发送！！
         1.以无痕模式打开浏览器（Edge请新建InPrivate窗口）
         2.打开http://bbs.mihoyo.com/bh3/并登陆
         3.新建标签页打开http://user.mihoyo.com/并登陆
@@ -52,10 +55,8 @@ class NotBindError(Exception):
         var cookie=document.cookie;var ask=confirm('Cookie:'+cookie+'\\n\\nDo you want to copy the cookie to the clipboard?');if(ask==true){copy(cookie);msg=cookie}else{msg='Cancel'}
         6.按确定即可自动复制，手动复制也可以
         7.私聊真寻发送：崩坏三ck 刚刚复制的cookie
-            如果遇到真寻不回复可能是ck里部分字符组合触发了真寻黑名单词汇拦截，可以以下方法任选其一：
-            a) 只复制需要的ck内容
+            如果遇到真寻不回复可能是ck里部分字符组合触发了真寻黑名单词汇拦截，可以只复制需要的ck内容
                 例：崩坏三ck login_ticket=xxxxxxxxxxxxxxx
-            b) 绑定原神cookie后输入 崩坏三ck同步
         8.在不点击登出的情况下关闭无痕浏览器
 
 """
