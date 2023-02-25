@@ -4,12 +4,15 @@ from services.log import logger
 from nonebot.params import CommandArg
 from configs.config import Config
 from utils.http_utils import AsyncHttpx
-from utils.message_builder import image
+from utils.message_builder import image, at
+from utils.utils import scheduler, get_bot
 from plugins.genshin.query_user._models import Genshin
 from ..modules.database import DB
 from ..modules.image_handle import (ItemTrans, DrawFinance)
 from ..modules.query import InfoError, Finance, NotBindError
-import json, re, os
+from string import ascii_letters, digits
+from io import BytesIO
+import json, re, os, random, qrcode, base64
 
 
 __zx_plugin_name__ = "崩坏三绑定"
@@ -22,7 +25,8 @@ usage：
         崩坏三绑定[uid][服务器]
         崩坏三服务器列表
         崩坏三ck[cookie]     # 该绑定请私聊
-        崩坏三ck同步         # 该命令要求先绑定原神cookie，通过绑定的原神cookie绑定崩三ck
+        崩坏三ck同步         # 该命令要求先绑定原神cookie，通过绑定的原神cookie绑定崩三ck        
+        崩坏三ck扫码         # 使用米游社扫码绑定崩三ck（不可用扫码器）
         示例：崩坏三绑定114514官服
             崩坏三cklogin_ticket==xxxxxxxxxxxxxxx
     如果不明白怎么获取cookie请输入“崩坏三ck”。
@@ -30,7 +34,7 @@ usage：
 __plugin_des__ = "绑定自己的崩坏三uid等"
 __plugin_cmd__ = ["崩坏三绑定[uid][服务器]", "崩坏三服务器列表", "崩坏三ck"]
 __plugin_type__ = ("崩坏三相关",)
-__plugin_version__ = 0.1
+__plugin_version__ = 0.2
 __plugin_author__ = "mobius"
 __plugin_settings__ = {
     "level": 5,
@@ -53,6 +57,9 @@ server = on_command("崩坏三服务器列表", aliases={"崩三服务器列表"
 ck = on_command(
     "崩坏三ck", aliases={"崩三ck", "崩3ck", "崩坏3ck"}, priority=5, block=True
 )
+
+qrcode_data_map = {}
+
 @bind.handle()
 async def _(event: MessageEvent, arg: Message = CommandArg()):
     msg = arg.extract_plain_text().strip()
@@ -125,7 +132,31 @@ async def _(bot: Bot, event: MessageEvent, arg: Message = CommandArg()):
         account_id = None
         cookie_token = None
         cookie_json = None
-        if "同步" == msg:
+        if "扫码" == msg:
+            if str(event.user_id) in qrcode_data_map:
+                await ck.finish('请扫描上一次的二维码')
+            qrcode_data = await get_qrcode_data()
+            qrcode_data_map[str(event.user_id)] = qrcode_data
+            qrcode_img = generate_qrcode(qrcode_data['url'])
+            qrcode_data_map[str(event.user_id)]['qrcode_img'] = qrcode_img            
+            qrcode_data_map[str(event.user_id)]['user_id'] = str(event.user_id)
+            msg_data = await ck.send(MessageSegment.image(qrcode_img) + 
+                f'\n请在3分钟内使用米游社扫码并确认进行绑定。\n注意：\n1.扫码即代表你同意将Cookie信息授权给真寻及{event.sender.card}\n2.扫码时会提示登录崩坏三，实际不会顶号\n3.其他人请不要乱扫，否则会将你的账号绑到TA身上！',
+                at_sender=True)
+            qrcode_data_map[str(event.user_id)]['msg_id'] = msg_data['message_id']
+            if isinstance(event, GroupMessageEvent):
+                qrcode_data_map[str(event.user_id)]['group_id'] = event.group_id
+            # 添加定时任务
+            scheduler.add_job(
+                func=check_qrcode,  
+                trigger="cron", 
+                second='*/10',
+                misfire_grace_time=10,
+                args=(qrcode_data_map[str(event.user_id)], ck_flag, ),
+                id=f'bh3_check_qrcode_{event.user_id}'
+            )
+            return
+        elif "同步" == msg:
             #获取原神uid
             genshin_user = await Genshin.get_user_by_qq(event.user_id)
             login_ticket = genshin_user.login_ticket
@@ -201,3 +232,92 @@ async def _(bot: Bot, event: MessageEvent, arg: Message = CommandArg()):
     im = fid.draw()
     img = MessageSegment.image(im)
     await ck.finish("已绑定"+img, at_sender=True)
+
+# 获取二维码连接
+async def get_qrcode_data():
+    device_id = ''.join(random.choices((ascii_letters + digits), k=64))
+    app_id = '1' # 崩坏三
+    data = {'app_id': app_id,
+            'device': device_id}
+    res = await AsyncHttpx.post('https://hk4e-sdk.mihoyo.com/hk4e_cn/combo/panda/qrcode/fetch?',json=data)
+    url = res.json()['data']['url']
+    ticket = url.split('ticket=')[1]
+    return {'app_id': app_id, 'ticket': ticket, 'device': device_id, 'url': url}
+
+# 生成二维码
+def generate_qrcode(url):
+    qr = qrcode.QRCode(version=1,
+                       error_correction=qrcode.constants.ERROR_CORRECT_L,
+                       box_size=10,
+                       border=4)
+    qr.add_data(url)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color='black', back_color='white')
+    bio = BytesIO()
+    img.save(bio)
+    return f'base64://{base64.b64encode(bio.getvalue()).decode()}'
+
+# 校验登录结果
+async def check_login(qrcode_data: dict):
+    data = {'app_id': qrcode_data['app_id'],
+            'ticket': qrcode_data['ticket'],
+            'device': qrcode_data['device']}
+    res = await AsyncHttpx.post('https://hk4e-sdk.mihoyo.com/hk4e_cn/combo/panda/qrcode/query?', json=data)
+    return res.json()
+
+# 获取token
+async def get_cookie_token(game_token: dict):
+    res = await AsyncHttpx.get(
+        f"https://api-takumi.mihoyo.com/auth/api/getCookieAccountInfoByGameToken?game_token={game_token['token']}&account_id={game_token['uid']}")
+    cookie_token_data = res.json()
+    logger.info("cookie_token_data:" + str(cookie_token_data))
+    return cookie_token_data['data']['uid'], cookie_token_data['data']['cookie_token']
+
+# 检查登录状态
+async def check_qrcode(qrcode_data: dict, ck_flag = True):
+    send_msg = None
+    try:
+        status_data = await check_login(qrcode_data)
+        logger.info("status_data:" + str(status_data))
+        if status_data['retcode'] != 0:
+            send_msg = '绑定二维码已过期，请重新发送扫码绑定指令'
+            qrcode_data_map.pop(qrcode_data["user_id"])
+            scheduler.remove_job(f'bh3_check_qrcode_{qrcode_data["user_id"]}',)
+        # 校验通过
+        elif status_data['data']['stat'] == 'Confirmed':
+            qrcode_data_map.pop(qrcode_data["user_id"])
+            scheduler.remove_job(f'bh3_check_qrcode_{qrcode_data["user_id"]}',)
+            game_token = json.loads(status_data['data']['payload']['raw'])
+            if "token" not in game_token.keys():
+                send_msg = f"请勿使用扫码器，请使用米游社扫码"
+                return
+            #获取token
+            account_id, cookie_token = await get_cookie_token(game_token)
+            if not ck_flag:
+                send_msg = f"当前未配置查询ck，请在真寻配置文件config.yaml的bind_bh3.COOKIE下配置如下内容，然后重启真寻。\ncookie_token={cookie_token};account_id={account_id}"
+                return
+            spider = Finance(qid=qrcode_data["user_id"], cookieraw=account_id + "," + cookie_token)
+            try:
+                #绑定ck
+                fi = await spider.get_finance()
+            except InfoError as e:
+                send_msg = str(e)
+                return
+            fid = DrawFinance(**fi)
+            im = fid.draw()
+            img = MessageSegment.image(im)
+            send_msg = "已绑定"+img
+    except Exception as e:
+        import traceback
+        logger.error("崩三ck扫码检查出错：" + traceback.format_exc())
+        send_msg = type(e) + str(e)
+        scheduler.remove_job(f'bh3_check_qrcode_{qrcode_data["user_id"]}',)
+    finally:
+        # 反馈绑定结果
+        if send_msg:
+            bot = get_bot()
+            if bot:
+                if ck_flag and "group_id" in qrcode_data.keys():
+                    await bot.send_group_msg(group_id=qrcode_data["group_id"], message=at(qrcode_data["user_id"]) + send_msg)
+                else:
+                    await bot.send_private_msg(user_id=qrcode_data["user_id"], message=send_msg)
