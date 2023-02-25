@@ -1082,4 +1082,4 @@ class DrawFinance(FinanceInfo):
                 )
             ring = dr.ring(data)
             finance_bg.alpha_composite(ring, dest=(37, 861))
-            return pic2b64(finance_bg)
+        return pic2b64(finance_bg)
