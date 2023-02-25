@@ -2,7 +2,7 @@
  * @Author: MobiusT
  * @Date: 2023-02-25 19:14:10
  * @LastEditors: MobiusT
- * @LastEditTime: 2023-02-25 19:31:47
+ * @LastEditTime: 2023-02-25 22:53:23
 -->
 # bh3
 
@@ -73,10 +73,19 @@
 <br>
 ***该功能需要绑定cookie<br>
 </details>
+<details>
+<summary>崩坏三兑换码</summary>
+[崩坏三]兑换码<br>
+</details>
 
 ## 更新
 
-**2023/02/05**[崩坏三绑定](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/bh3/bind_bh3)[v0.2]
+**2023/02/25**[崩坏三兑换码](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/bh3/code_bh3)[v0.1]
+
+1. 新增崩坏三兑换码插件，功能测试中；改写自[monsterxcn/nonebot-plugin-gscode](https://github.com/monsterxcn/nonebot-plugin-gscode/tree/main/nonebot_plugin_gscode)
+
+
+**2023/02/25**[崩坏三绑定](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/bh3/bind_bh3)[v0.2]
 
 1. 新增扫码绑定ck命令： 崩三ck扫码 （新增依赖qrcode）
 
