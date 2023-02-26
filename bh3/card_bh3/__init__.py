@@ -1,3 +1,9 @@
+'''
+Author: MobiusT
+Date: 2023-02-24 20:13:42
+LastEditors: MobiusT
+LastEditTime: 2023-02-26 17:36:34
+'''
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import MessageEvent, Message, MessageSegment
 from services.log import logger
@@ -37,8 +43,8 @@ __plugin_block_limit__ = {
     "rst": "[at]你正在查询！"
 }
 __plugin_cd_limit__ = {
-    "cd": 30,
-    "rst": "[at]你刚查过，别查了！"
+    "limit_type": "group",
+    "rst": "正在查询中，请等待当前请求完成...",
 }
 card = on_command(
     "崩坏三卡片", aliases={"崩三卡片", "崩3卡片", "崩坏3卡片"}, priority=5, block=True

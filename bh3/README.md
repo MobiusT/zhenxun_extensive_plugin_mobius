@@ -2,7 +2,7 @@
  * @Author: MobiusT
  * @Date: 2023-02-25 19:14:10
  * @LastEditors: MobiusT
- * @LastEditTime: 2023-02-25 23:20:53
+ * @LastEditTime: 2023-02-26 17:39:56
 -->
 # bh3
 
@@ -79,6 +79,10 @@
 </details>
 
 ## 更新
+
+**2023/02/25**
+
+1. 修改cd类型为群聊
 
 **2023/02/25**[崩坏三绑定](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/bh3/bind_bh3)[v0.2]， [崩坏三兑换码](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/bh3/code_bh3)[v0.1]
 
