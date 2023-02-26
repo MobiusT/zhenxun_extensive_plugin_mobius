@@ -2,7 +2,7 @@
 Author: MobiusT
 Date: 2022-12-23 21:09:31
 LastEditors: MobiusT
-LastEditTime: 2023-02-17 21:18:33
+LastEditTime: 2023-02-26 17:36:14
 '''
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, MessageSegment, MessageEvent
@@ -47,8 +47,8 @@ __plugin_block_limit__ = {
     "rst": "[at]你正在查询崩三排行！"
 }
 __plugin_cd_limit__ = {
-    "cd": 30,
-    "rst": "[at]你刚查过崩三排行，别查了！"
+    "limit_type": "group",
+    "rst": "正在查询中，请等待当前请求完成...",
 }
 __plugin_configs__ = {
     "SHOWCOUNTALL": {

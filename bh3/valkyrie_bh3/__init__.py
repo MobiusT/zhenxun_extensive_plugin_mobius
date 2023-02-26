@@ -1,3 +1,9 @@
+'''
+Author: MobiusT
+Date: 2023-02-24 20:13:42
+LastEditors: MobiusT
+LastEditTime: 2023-02-26 17:38:48
+'''
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import MessageEvent, Message, MessageSegment
 from services.log import logger
@@ -38,8 +44,8 @@ __plugin_block_limit__ = {
     "rst": "[at]你正在查询！"
 }
 __plugin_cd_limit__ = {
-    "cd": 60,
-    "rst": "[at]你刚查过，别查了！"
+    "limit_type": "group",
+    "rst": "正在查询中，请等待当前请求完成...",
 }
 valkyrie = on_command(
     "崩坏三女武神", aliases={"崩三女武神", "崩3女武神", "崩坏3女武神"}, priority=5, block=True
