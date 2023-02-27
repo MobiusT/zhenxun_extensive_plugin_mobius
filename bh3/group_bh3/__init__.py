@@ -43,8 +43,8 @@ __plugin_block_limit__ = {
     "rst": "[at]你正在查询！"
 }
 __plugin_cd_limit__ = {
-    "cd": 60,
-    "rst": "[at]你刚查过，别查了！"
+    "limit_type": "group",
+    "rst": "正在查询中，请等待当前请求完成...",
 }
 group = on_regex(r"^(崩坏三|崩三|崩坏3|崩3)(.{1,3})阵容(.{0,30})$", priority=5, block=True)
 
