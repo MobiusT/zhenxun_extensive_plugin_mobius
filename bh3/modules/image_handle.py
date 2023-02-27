@@ -1086,6 +1086,7 @@ class DrawFinance(FinanceInfo):
 
 
 async def get_avatar_url(avatar_url, qid):  
+    a_url = ""
     qava_url = f"http://q1.qlogo.cn/g?b=qq&nk={qid}&s=140"
     if avatar_url is not None:
         try:
@@ -1109,4 +1110,4 @@ async def get_avatar_url(avatar_url, qid):
             im_temp = img_404
         if not ImageChops.difference(img_404, im_temp).getbbox():
             return qava_url
-        return avatar_url
+        return a_url
