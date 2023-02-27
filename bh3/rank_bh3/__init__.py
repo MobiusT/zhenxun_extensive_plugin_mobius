@@ -5,7 +5,7 @@ LastEditors: MobiusT
 LastEditTime: 2023-02-26 17:36:14
 '''
 from nonebot import on_command
-from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, MessageSegment, MessageEvent
+from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message
 from nonebot.params import CommandArg
 from services.log import logger
 from models.group_member_info import GroupInfoUser
@@ -16,9 +16,10 @@ from ..modules.database import DB
 from ..modules.query import InfoError, GetInfo
 from ..modules.util import ItemTrans
 from ..modules.mytyping import RankInfo
+from ..modules.image_handle import get_avatar_url
 from nonebot_plugin_htmlrender import html_to_pic
 from datetime import datetime, timedelta
-import time, os, re, json
+import time, os, json
 
 
 __zx_plugin_name__ = "崩坏三排行"
@@ -54,12 +55,14 @@ __plugin_configs__ = {
     "SHOWCOUNTALL": {
         "value": 10,         # 配置值
         "help": "崩三排行，战场总分排行展示数量",            # 配置项说明，为空时则不添加配置项说明注释
-        "default_value": 10   # 当value值为空时返回的默认值   
+        "default_value": 10,   # 当value值为空时返回的默认值  
+        "type": int, 
     },
     "SHOWCOUNTBOSS": {
         "value": 5,         # 配置值
         "help": "崩三排行，战场每个boss排行展示数量",            # 配置项说明，为空时则不添加配置项说明注释
-        "default_value": 5   # 当value值为空时返回的默认值   
+        "default_value": 5,   # 当value值为空时返回的默认值   
+        "type": int,
     },
 }
 
@@ -196,7 +199,8 @@ async def getAbyssData(group_id: str):
         spider = GetInfo(server_id=region_id, role_id=role_id)
         try:
             ind = await spider.rank(is_abyss=True)
-            ind = RankInfo(**ind)            
+            ind = RankInfo(**ind)       
+            ind.qid = qid     
         except InfoError as e:
             continue
         #跳过非终级区
@@ -275,16 +279,7 @@ async def getAbyssData(group_id: str):
             para["rank"] = rankNo
             rankNo += 1
             avatar_url = i.index.role.AvatarUrl
-            a_url = ""
-            try:
-                no = re.search(r"\d{3,}", avatar_url).group()
-                a_url = avatar_url.split(no)[0] + no + ".png"
-            except:
-                try:
-                    no = re.search(r"[a-zA-Z]{1,}\d{2}", avatar_url).group()
-                    a_url = avatar_url.split(no)[0] + no + ".png"
-                except:
-                    a_url = "https://upload-bbs.mihoyo.com/game_record/honkai3rd/all/SpriteOutput/AvatarIcon/705.png"
+            a_url = await get_avatar_url(avatar_url, i.qid)          
             para["AvatarUrl"]=a_url
             para["nickname"]=i.index.role.nickname
             para["cup"]=i.index.stats.new_abyss.cup_number
@@ -439,6 +434,7 @@ async def getBattleData(group_id: str):
         try:
             ind = await spider.rank()
             ind = RankInfo(**ind)
+            ind.qid = qid
         except InfoError as e:
             continue
         #跳过非终级区
@@ -515,16 +511,7 @@ async def getBattleData(group_id: str):
         para["rank"] = rankNo
         rankNo += 1
         avatar_url = i.index.role.AvatarUrl
-        a_url = ""
-        try:
-            no = re.search(r"\d{3,}", avatar_url).group()
-            a_url = avatar_url.split(no)[0] + no + ".png"
-        except:
-            try:
-                no = re.search(r"[a-zA-Z]{1,}\d{2}", avatar_url).group()
-                a_url = avatar_url.split(no)[0] + no + ".png"
-            except:
-                a_url = "https://upload-bbs.mihoyo.com/game_record/honkai3rd/all/SpriteOutput/AvatarIcon/705.png"
+        a_url = await get_avatar_url(avatar_url, i.qid)
         para["AvatarUrl"]=a_url
         para["nickname"]=i.index.role.nickname
         para["score"]=i.battleFieldReport.reports[0].score

@@ -363,3 +363,4 @@ class RankInfo(BaseModel):
     index: Index
     newAbyssReport: Optional[Abyss]
     battleFieldReport: Optional[BattleField]
+    qid: Optional[str]
