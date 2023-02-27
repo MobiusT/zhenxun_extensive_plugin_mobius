@@ -595,7 +595,9 @@ async def getBattleData(group_id: str):
     save_data(rank_data)
 
 #最新一期结算时间
-def lastest_cutoff_day(today = datetime.now(), is_abyss = False):
+def lastest_cutoff_day(today = None, is_abyss = False):
+    if not today:
+        today = datetime.now()
     if is_abyss and today.weekday() >= 3:
         return datetime.strftime(today - timedelta(today.weekday()-2), "%Y-%m-%d")
     elif is_abyss:
@@ -604,7 +606,9 @@ def lastest_cutoff_day(today = datetime.now(), is_abyss = False):
         return datetime.strftime(today - timedelta(today.weekday()), "%Y-%m-%d")
 
 #上一期结算时间
-def last_cutoff_day(today = datetime.now(), is_abyss = False):
+def last_cutoff_day(today = None, is_abyss = False):
+    if not today:
+        today = datetime.now()
     if is_abyss:
         return lastest_cutoff_day(today, is_abyss)
     else:
