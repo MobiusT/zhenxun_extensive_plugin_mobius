@@ -40,17 +40,16 @@ async def getActId() -> str:
         if not post:
             continue
         if not all(word in post["subject"] for word in keywords):
-            continue        
+            continue
         shit = json.loads(post["structured_content"])
         for segment in shit:
             link = segment.get("attributes", {}).get("link", "")
-            if "点击前往" in segment.get("insert", "") and link:
+            if link:
                 matched = findall(r"act_id=(\d{8}bh3\d{4})", link)
                 if matched:
                     actId = matched[0]
         if actId:
             break
-
     return actId
 
 async def get_week_code() -> str:
@@ -58,7 +57,6 @@ async def get_week_code() -> str:
     ret = await getData("actId")
     if ret.get("error") or ret.get("retcode") != 0:
         return ""
-
     code = ""
     keywords = ["本周福利礼包掉落"]
     for p in ret["data"]["list"]:
@@ -70,10 +68,9 @@ async def get_week_code() -> str:
         shit = json.loads(post["structured_content"])
         for segment in shit:
             if isinstance(segment.get("insert", ""), str) and "\n★叮" in segment.get("insert", ""):
-                code = f'★{segment.get("insert").split("★")[1]}'
+                code = f'★{segment.get("insert").split("★叮")[1]}'
         if code:
             break
-
     return code
 
 
