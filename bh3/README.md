@@ -2,7 +2,7 @@
  * @Author: MobiusT
  * @Date: 2023-02-25 19:14:10
  * @LastEditors: MobiusT
- * @LastEditTime: 2023-03-03 19:44:04
+ * @LastEditTime: 2023-03-03 20:16:08
 -->
 # bh3
 
@@ -76,6 +76,15 @@
 <details>
 <summary>崩坏三兑换码</summary>
 [崩坏三]兑换码<br>
+</details>
+
+## 可能遇到的问题
+
+<details>
+<summary>崩三兑换码发送空白消息</summary>
+
+插件依赖 [@Mrs4s/go-cqhttp](https://github.com/Mrs4s/go-cqhttp) 的合并转发接口，如需启用私聊响应请务必安装 [v1.0.0-rc2](https://github.com/Mrs4s/go-cqhttp/releases/tag/v1.0.0-rc2) 以上版本的 go-cqhttp。
+
 </details>
 
 ## 更新
