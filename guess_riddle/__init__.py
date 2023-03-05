@@ -2,13 +2,14 @@
 Author: MobiusT
 Date: 2023-01-20 18:51:43
 LastEditors: MobiusT
-LastEditTime: 2023-01-20 19:28:37
+LastEditTime: 2023-03-05 21:14:13
 '''
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import GROUP, Bot, GroupMessageEvent, Message
 from nonebot.params import CommandArg
 from nonebot.log import logger
 from utils.http_utils import AsyncHttpx
+from configs.config import Config
 from models.bag_user import BagUser
 import json
 
@@ -37,6 +38,11 @@ __plugin_settings__ = {
     "default_status": True,
     "limit_superuser": False,
     "cmd": __plugin_cmd__,
+}
+
+__plugin_count_limit__ = {
+    "max_count": 20,
+    "rst": "你今天猜的够多了哦！"
 }
 
 start = on_command("猜谜语", aliases={"猜谜"}, permission=GROUP, priority=5, block=True)
