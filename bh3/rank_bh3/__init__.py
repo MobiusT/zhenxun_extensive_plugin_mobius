@@ -2,7 +2,7 @@
 Author: MobiusT
 Date: 2022-12-23 21:09:31
 LastEditors: MobiusT
-LastEditTime: 2023-02-26 17:36:14
+LastEditTime: 2023-03-06 19:13:24
 '''
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message
@@ -145,11 +145,10 @@ async def _(event: GroupMessageEvent):
     await getAbyssData(group_id)
     await abyss_update.finish(f'已更新崩坏三深渊排行，请使用命令 崩坏三深渊排行 或 崩坏三深渊排行全部 查看', at_sender=True ) 
 
-@scheduler.scheduled_job(#定时任务，每周一、周四6时
+@scheduler.scheduled_job(#定时任务，每日5时30
     "cron",
-    day_of_week="mon,thu",
-    hour=6,
-    minute=0,
+    hour=5,
+    minute=30,
 )
 async def _():
     try:
@@ -382,9 +381,8 @@ async def _(event: GroupMessageEvent):
     await getBattleData(group_id)
     await battle_field_update.finish(f'已更新崩坏三战场排行，请使用命令 崩坏三战场排行 查看', at_sender=True ) 
 
-@scheduler.scheduled_job(#定时任务，每周一、周二5时
+@scheduler.scheduled_job(#定时任务，每日5时
     "cron",
-    day_of_week="mon,tue",
     hour=5,
     minute=0,
 )

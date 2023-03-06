@@ -2,7 +2,7 @@
  * @Author: MobiusT
  * @Date: 2023-02-25 19:14:10
  * @LastEditors: MobiusT
- * @LastEditTime: 2023-03-03 20:16:08
+ * @LastEditTime: 2023-03-06 20:53:15
 -->
 # bh3
 
@@ -56,6 +56,10 @@
 崩坏三语音[name]：随机发送指定女武神一段语音<br>
 崩坏三语音列表[name]：查看指定女武神所有语音<br>
 崩坏三语音[name][id]：发送指定女武神的指定语音<br>
+崩坏三语音新增答案[标准答案]:[别称]  #将新的别称映射到标准答案中<br>
+崩坏三语音更新答案    #更新答案模板<br>
+更新崩坏三语音列表    #更新语音<br>
+
 <br>
 ***该功能需要额外语音素材，请超级用户按需根据bh3/guess_voice/readme.md获取免费素材<br>
 </details>
@@ -88,6 +92,14 @@
 </details>
 
 ## 更新
+
+**2023/03/06**[崩坏三猜语音](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/bh3/guess_voice)[v0.2]
+
+1. 崩三排行修改为每日更新，避免更新时米游社数据未同步或新增绑定角色时数据不准确
+
+2. 崩三猜语音新增超级用户帮助
+
+3. 崩三猜语音新增命令 崩坏三语音更新答案 可以从本库更新answer.json 【超级用户权限】
 
 **2023/03/03**
 
