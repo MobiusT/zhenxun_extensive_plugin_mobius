@@ -2,7 +2,7 @@
  * @Author: MobiusT
  * @Date: 2023-02-25 19:14:10
  * @LastEditors: MobiusT
- * @LastEditTime: 2023-03-06 20:53:15
+ * @LastEditTime: 2023-03-09 19:49:14
 -->
 # bh3
 
@@ -47,6 +47,7 @@
 崩坏三XXX阵容[uid]           #查询已经绑定过uid的玩家的女武神<br>
 崩坏三XXX阵容[@]             #查询at的玩家绑定的角色女武神<br>
 崩坏三XXX阵容米游社/mys/MYS[米游社id] #查询该米游社id的角色女武神<br>
+崩坏三阵容更新      #更新阵容简称
 </details>
 <details>
 <summary>崩坏三猜语音</summary>
@@ -92,6 +93,15 @@
 </details>
 
 ## 更新
+
+**2023/03/06**[崩坏三阵容](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/bh3/group_bh3)[v0.2]
+
+1. 崩三语音适配苏莎娜， 优化超级用户帮助写法
+
+2. 崩三阵容适配苏莎娜
+
+3. 崩三阵容新增命令 崩坏三阵容更新  可以从本库更新group.json 【超级用户权限】
+
 
 **2023/03/06**[崩坏三猜语音](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/bh3/guess_voice)[v0.2]
 
