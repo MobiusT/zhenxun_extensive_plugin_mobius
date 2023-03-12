@@ -1082,4 +1082,32 @@ class DrawFinance(FinanceInfo):
                 )
             ring = dr.ring(data)
             finance_bg.alpha_composite(ring, dest=(37, 861))
-            return pic2b64(finance_bg)
+        return pic2b64(finance_bg)
+
+
+async def get_avatar_url(avatar_url, qid):  
+    a_url = ""
+    qava_url = f"http://q1.qlogo.cn/g?b=qq&nk={qid}&s=140"
+    if avatar_url is not None:
+        try:
+            no = re.search(r"\d{3,}", avatar_url).group()
+            a_url = avatar_url.split(no)[0] + no + ".png"
+        except:
+            try:
+                no = re.search(r"[a-zA-Z]{1,}\d{2}", avatar_url).group()
+                a_url = avatar_url.split(no)[0] + no + ".png"
+            except:
+                a_url = "https://upload-bbs.mihoyo.com/game_record/honkai3rd/all/SpriteOutput/AvatarIcon/705.png"
+    else:
+        a_url = qava_url.format(qid=qid)
+    pic_data = await myDraw.get_net_img(url=a_url)
+    with Image.open(
+        os.path.join(os.path.dirname(__file__), "../assets/404.png")
+    ) as img_404:
+        try:
+            im_temp = Image.open(pic_data)
+        except UnidentifiedImageError:
+            im_temp = img_404
+        if not ImageChops.difference(img_404, im_temp).getbbox():
+            return qava_url
+        return a_url

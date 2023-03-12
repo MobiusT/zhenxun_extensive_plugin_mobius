@@ -21,3 +21,6 @@ bh3/rank_bh3/image/*.png
 test/*
 bh3/rank_bh3/rank.json
 openai/*
+traditional2simplified/map.json
+revchatgpt/*
+bh3/group_bh3/group.json

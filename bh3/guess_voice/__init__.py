@@ -4,6 +4,7 @@ from nonebot.permission import SUPERUSER
 from nonebot.adapters.onebot.v11 import MessageSegment, MessageEvent, Message, GroupMessageEvent, GROUP
 from nonebot.params import CommandArg
 from nonebot_plugin_htmlrender import text_to_pic
+from utils.http_utils import AsyncHttpx
 from .game import GameSession
 
 __zx_plugin_name__ = "崩坏三猜语音"
@@ -20,10 +21,18 @@ usage：
 
         ***该功能需要额外语音素材，请超级用户按需根据bh3/guess_voice/readme.md获取免费素材
 """.strip()
+__plugin_superuser_usage__ = f"""{__plugin_usage__}
+
+    超级用户指令：
+        崩坏三语音新增答案[标准答案]:[别称]  #将新的别称映射到标准答案中
+            例： 崩坏三语音新增答案丽塔:缭乱星棘
+        崩坏三语音更新答案    #更新答案模板
+        更新崩坏三语音列表    #更新语音
+""".strip()
 __plugin_des__ = "崩坏三猜语音"
 __plugin_cmd__ = ["崩坏三猜语音"]
 __plugin_type__ = ("崩坏三相关",)
-__plugin_version__ = 0.1
+__plugin_version__ = 0.2
 __plugin_author__ = "mobius"
 __plugin_settings__ = {
     "level": 5,
@@ -37,6 +46,7 @@ guess = on_command("崩坏三猜语音", aliases={"崩三猜语音", "崩3猜语
 answer = on_command("崩坏三猜语音答案", aliases={"崩三猜语音答案", "崩3猜语音答案", "崩坏3猜语音答案", "猜语音答案"}, priority=6, permission=GROUP, block=True)
 getVoice = on_command("崩坏三语音", aliases={"崩三语音", "崩3语音", "崩坏3语音"}, priority=6, permission=GROUP, block=True)
 addAnswer = on_command("崩坏三语音新增答案", aliases={"崩三语音新增答案", "崩3语音新增答案", "崩坏3语音新增答案"}, priority=5, permission=SUPERUSER, block=True)
+updateAnswer = on_command("崩坏三语音更新答案", aliases={"崩三语音更新答案", "崩3语音更新答案", "崩坏3语音更新答案"}, priority=5, permission=SUPERUSER, block=True)
 undateVoice = on_command("更新崩坏三语音列表", aliases={"更新崩三语音列表", "更新崩3语音列表", "更新崩坏3语音列表"}, priority=5, permission=SUPERUSER, block=True)
 
 def split_voice_by_chara(v_list: list):
@@ -187,6 +197,26 @@ async def add_answer(event: MessageEvent, arg: Message = CommandArg()):
         json.dump(data, f, ensure_ascii=False, indent=4)
     await addAnswer.finish("添加完成。")
 
+#崩坏三语音更新答案
+@updateAnswer.handle()
+async def _(event: MessageEvent):
+    url = "https://ghproxy.com/https://raw.githubusercontent.com/MobiusT/zhenxun_extensive_plugin_mobius/main/bh3/guess_voice/answer_template.json"
+    data_remote = await AsyncHttpx.get(url)
+    data_remote = json.loads(data_remote.text)    
+    data_local = GameSession.__load__("answer.json")
+    for key in data_remote.keys():
+        if key in data_local.keys():
+            #合并答案
+            data_local[key] = list(set(data_local[key] + data_remote[key]))
+        else:
+            #新增答案
+            data_local[key] = data_remote[key]
+    #保存答案
+    with open(
+        os.path.join(os.path.dirname(__file__), "answer.json"), "w", encoding="utf8"
+    ) as f:
+        json.dump(data_local, f, ensure_ascii=False, indent=4)
+    await updateAnswer.finish("更新完成。")
 
 @undateVoice.handle()
 async def update_voice_list():

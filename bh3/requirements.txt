@@ -1,7 +1,8 @@
-Pillow<9.2.0
+Pillow
 pydantic
 PyYAML
 httpx
 sqlitedict
 genshinhelper>=2.1.1
 nonebot_plugin_htmlrender
+qrcode

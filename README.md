@@ -2,7 +2,7 @@
  * @Author: MobiusT
  * @Date: 2022-11-03 21:30:42
  * @LastEditors: MobiusT
- * @LastEditTime: 2023-02-10 22:32:15
+ * @LastEditTime: 2023-02-25 23:21:04
 -->
 # zhenxun_extensive_plugin_mobius
 
@@ -49,12 +49,6 @@ AttributeError: 'NoneType' object has no attribute 'encode'
 ```
 尝试执行pip install httpx 或 pip install nb-cli
 
-```python
-ValueError: Operation on closed image
-```
-执行pip install pillow==9.1.1
-
-
 
 ```
 签到图片中出现白色方块
@@ -62,5 +56,15 @@ ValueError: Operation on closed image
 下载[emoji字体](https://gitee.com/songboy/noto-emoji/tree/master/fonts),放到/usr/share/fonts下，加载字体后重启真寻
 
 ## 感谢
-[CRAZYShimakaze/genshin_role_info](https://github.com/CRAZYShimakaze/zhenxun_extensive_plugin/tree/main/genshin_role_info) : 源码参考（我是fw）
+
+[CRAZYShimakaze/genshin_role_info](https://github.com/CRAZYShimakaze/zhenxun_extensive_plugin/tree/main/genshin_role_info) : 代码参考
+
 [HibiKier/zhenxun_bot](https://github.com/HibiKier/zhenxun_bot) : 超好用的基于nonebot2的qq机器人
+
+[CMHopeSunshine/LittlePaimon](https://github.com/CMHopeSunshine/LittlePaimon) : 代码参考
+
+[monsterxcn/nonebot-plugin-gscode](https://github.com/monsterxcn/nonebot-plugin-gscode/tree/main/nonebot_plugin_gscode) : 代码参考
+
+## 声明
+
+此项目仅用于学习交流，请勿用于非法用途

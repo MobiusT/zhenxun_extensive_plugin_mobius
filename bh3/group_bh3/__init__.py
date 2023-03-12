@@ -1,8 +1,10 @@
-from nonebot import on_regex
+from nonebot import on_regex, on_command
 from nonebot.adapters.onebot.v11 import MessageEvent, Message, MessageSegment
 from services.log import logger
+from nonebot.permission import SUPERUSER
 from utils.message_builder import at
 from utils.utils import get_message_at, get_message_text
+from utils.http_utils import AsyncHttpx
 from configs.config import Config
 from ..modules.database import DB
 from ..modules.image_handle import DrawGroupCharacter
@@ -11,6 +13,7 @@ from ..modules.query import InfoError, GetInfo
 from ..utils.handle_id import handle_id_str
 from typing import Tuple, Any
 from nonebot.params import RegexGroup
+from shutil import copy
 import os, json
 
 
@@ -28,10 +31,15 @@ usage：
     例：崩坏三天识卡阵容
         
 """.strip()
+__plugin_superuser_usage__ = f"""{__plugin_usage__}
+
+    超级用户指令：    
+        崩坏三阵容更新      #更新阵容简称
+""".strip()
 __plugin_des__ = "获取崩坏三账号阵容信息"
 __plugin_cmd__ = ["崩坏三阵容"]
 __plugin_type__ = ("崩坏三相关",)
-__plugin_version__ = 0.1
+__plugin_version__ = 0.2
 __plugin_author__ = "mobius"
 __plugin_settings__ = {
     "level": 5,
@@ -43,10 +51,12 @@ __plugin_block_limit__ = {
     "rst": "[at]你正在查询！"
 }
 __plugin_cd_limit__ = {
-    "cd": 60,
-    "rst": "[at]你刚查过，别查了！"
+    "limit_type": "group",
+    "rst": "正在查询中，请等待当前请求完成...",
 }
 group = on_regex(r"^(崩坏三|崩三|崩坏3|崩3)(.{1,3})阵容(.{0,30})$", priority=5, block=True)
+
+updateGroup = on_command("崩坏三阵容更新", aliases={"崩三阵容更新", "崩3阵容更新", "崩坏3阵容更新"}, priority=5, permission=SUPERUSER, block=True)
 
 @group.handle()
 async def _(event: MessageEvent, reg_group: Tuple[Any, ...] = RegexGroup()):
@@ -60,7 +70,7 @@ async def _(event: MessageEvent, reg_group: Tuple[Any, ...] = RegexGroup()):
         groupName = "终始真"
     elif groupName == "律三家":
         groupName = "炎雷理"
-    groupJson=getGroupJson()
+    groupJson = await getGroupJson()
     groupList = []
     for name in groupName:
         if isinstance(groupJson[name], str):
@@ -98,12 +108,45 @@ async def _(event: MessageEvent, reg_group: Tuple[Any, ...] = RegexGroup()):
     img = MessageSegment.image(im)
     await group.finish(img, at_sender=True)
 
-def getGroupJson():
+#崩坏三阵容更新
+@updateGroup.handle()
+async def _(event: MessageEvent):
+    data_remote = await getGroupFromGit()
+    data_local = await getGroupJson()
+    for key in data_remote.keys():
+        if key in data_local.keys():
+            # 跳过相同阵容
+            if data_local[key] == data_remote[key] and isinstance(data_local[key], str):
+                continue
+            if isinstance(data_local[key], str):
+                data_local[key] = [data_local[key]]
+            if isinstance(data_remote[key], str):
+                data_remote[key] = [data_remote[key]]    
+            # 合并阵容
+            data_local[key] = list(set(data_local[key] + data_remote[key]))
+        else:
+            # 新增阵容简称
+            data_local[key] = data_remote[key]
+    #保存阵容
     with open(
-        os.path.join(os.path.dirname(__file__), "./group.json"),
-        "r",
-        encoding="utf8",
+        os.path.join(os.path.dirname(__file__), "./group.json"), "w", encoding="utf8"
     ) as f:
+        json.dump(data_local, f, ensure_ascii=False, indent=4)
+    await updateGroup.finish("更新完成。")
+
+# 获取本地文件
+async def getGroupJson():
+    groupFile=os.path.join(os.path.dirname(__file__), "./group.json")
+    if not os.path.exists(groupFile):
+        copy(os.path.join(os.path.dirname(__file__), "./group_template.json"), groupFile)
+    with open(groupFile, "r", encoding="utf8") as f:
         groupJson = json.load(f)
         f.close()
     return groupJson
+
+# 获取git文件
+async def getGroupFromGit():
+    url = "https://ghproxy.com/https://raw.githubusercontent.com/MobiusT/zhenxun_extensive_plugin_mobius/main/bh3/group_bh3/group_template.json"
+    data = await AsyncHttpx.get(url)
+    data = json.loads(data.text)
+    return data
