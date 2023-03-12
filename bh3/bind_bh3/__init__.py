@@ -158,13 +158,13 @@ async def _(bot: Bot, event: MessageEvent, arg: Message = CommandArg()):
             return
         elif "同步" == msg:
             #获取原神uid
-            genshin_user = await Genshin.get_user_by_qq(event.user_id)
-            login_ticket = genshin_user.login_ticket
+            genshin_user = await Genshin.get_or_none(user_qq = event.user_id)
+            login_ticket = genshin_user.login_ticket if genshin_user else None
+            cookie = genshin_user.cookie if genshin_user else None
             if not login_ticket:
-                if not genshin_user.cookie:
+                if not cookie:
                     raise InfoError(f'尚未绑定原神cookie，请先绑定原神cookie或发送 崩坏三ck 绑定崩坏三ck')
                 else:
-                    cookie = genshin_user.cookie
                     # 用: 代替=, ,代替;
                     cookie = '{"' + cookie.replace('=', '": "').replace("; ", '","').replace(";", '","') + '"}'
                     #反序列化
