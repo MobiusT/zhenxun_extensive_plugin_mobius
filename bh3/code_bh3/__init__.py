@@ -2,7 +2,7 @@
 Author: MobiusT
 Date: 2023-02-25 21:07:51
 LastEditors: MobiusT
-LastEditTime: 2023-02-25 22:49:59
+LastEditTime: 2023-03-18 19:12:55
 '''
 from nonebot.typing import T_State
 from nonebot.adapters.onebot.v11 import Bot,  Message, MessageSegment
@@ -15,12 +15,12 @@ from .data_source import getCodes, get_week_code
 __zx_plugin_name__ = "崩坏三兑换码"
 __plugin_usage__ = """
 usage：
-    获取崩坏三前瞻直播及周福利礼包兑换码 #功能测试中
+    获取崩坏三前瞻直播及周福利礼包兑换码
     指令：
         [崩坏三]兑换码
         
 """.strip()
-__plugin_des__ = "获取崩坏三账号摘要信息"
+__plugin_des__ = "查询崩坏三前瞻直播及周福利礼包兑换码"
 __plugin_cmd__ = ["崩坏三兑换码"]
 __plugin_type__ = ("崩坏三相关",)
 __plugin_version__ = 0.1
