@@ -2,7 +2,7 @@
  * @Author: MobiusT
  * @Date: 2023-02-25 19:14:10
  * @LastEditors: MobiusT
- * @LastEditTime: 2023-03-09 19:49:14
+ * @LastEditTime: 2023-03-18 19:14:10
 -->
 # bh3
 
@@ -93,6 +93,10 @@
 </details>
 
 ## 更新
+
+**2023/03/06**
+
+1. 调整崩三兑换码插件描述
 
 **2023/03/06**[崩坏三阵容](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/bh3/group_bh3)[v0.2]
 
