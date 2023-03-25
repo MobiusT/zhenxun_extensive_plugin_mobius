@@ -3,7 +3,6 @@ getSignLog/image/text2pic*
 **/__pycache__/
 
 bh3/modules/data/uid.sqlite
-bh3/honkai_mys
 bh3/assets/AvatarCardFigures/*
 bh3/assets/AvatarCardIcons/*
 bh3/assets/AvatarIcon/*
@@ -20,7 +19,5 @@ resendRecallMsgByqid/recall.json
 bh3/rank_bh3/image/*.png
 test/*
 bh3/rank_bh3/rank.json
-openai/*
 traditional2simplified/map.json
-revchatgpt/*
 bh3/group_bh3/group.json
