@@ -1,3 +1,9 @@
+'''
+Author: MobiusT
+Date: 2023-03-26 00:08:11
+LastEditors: MobiusT
+LastEditTime: 2023-04-04 16:17:26
+'''
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import MessageEvent, Message, MessageSegment
 from services.log import logger
@@ -16,7 +22,7 @@ usage：
     如果未绑定cookie请at真寻并输入 帮助崩坏三绑定。
 """.strip()
 __plugin_des__ = "查看崩坏三手账"
-__plugin_cmd__ = ["崩坏三手账"]
+__plugin_cmd__ = ["崩三手账", "崩3手账", "崩坏3手账", "崩三手帐", "崩3手帐", "崩坏3手帐", "崩坏三手帐"]
 __plugin_type__ = ("崩坏三相关",)
 __plugin_version__ = 0.1
 __plugin_author__ = "mobius"
@@ -24,7 +30,7 @@ __plugin_settings__ = {
     "level": 5,
     "default_status": True,
     "limit_superuser": False,
-    "cmd": ["崩坏三手账", "崩三手账", "崩3手账", "崩坏3手账"],
+    "cmd": __plugin_cmd__,
 }
 __plugin_block_limit__ = {
     "rst": "[at]你正在查询！"
