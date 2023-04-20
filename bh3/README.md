@@ -2,7 +2,7 @@
  * @Author: MobiusT
  * @Date: 2023-02-25 19:14:10
  * @LastEditors: MobiusT
- * @LastEditTime: 2023-04-04 16:18:47
+ * @LastEditTime: 2023-04-21 00:26:54
 -->
 # bh3
 
@@ -94,15 +94,19 @@
 
 ## 更新
 
-**2023/03/06**
+**2023/04/21**
+
+1. 猜语音、崩三阵容插件适配羽兔及普罗米修斯
+
+**2023/04/04**
 
 1. 调整崩三手账插件的开关触发词，改为与命令触发词一致
 
-**2023/03/06**
+**2023/03/18**
 
 1. 调整崩三兑换码插件描述
 
-**2023/03/06**[崩坏三阵容](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/bh3/group_bh3)[v0.2]
+**2023/03/09**[崩坏三阵容](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/bh3/group_bh3)[v0.2]
 
 1. 崩三语音适配苏莎娜， 优化超级用户帮助写法
 
