@@ -200,7 +200,7 @@ async def add_answer(event: MessageEvent, arg: Message = CommandArg()):
 #崩坏三语音更新答案
 @updateAnswer.handle()
 async def _(event: MessageEvent):
-    url = "https://ghproxy.com/https://raw.githubusercontent.com/MobiusT/zhenxun_extensive_plugin_mobius/main/bh3/guess_voice/answer_template.json"
+    url = "https://fastly.jsdelivr.net/gh/MobiusT/zhenxun_extensive_plugin_mobius@main/bh3/guess_voice/answer_template.json"
     data_remote = await AsyncHttpx.get(url)
     data_remote = json.loads(data_remote.text)    
     data_local = GameSession.__load__("answer.json")

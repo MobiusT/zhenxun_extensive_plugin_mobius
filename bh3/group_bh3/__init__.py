@@ -146,7 +146,7 @@ async def getGroupJson():
 
 # 获取git文件
 async def getGroupFromGit():
-    url = "https://ghproxy.com/https://raw.githubusercontent.com/MobiusT/zhenxun_extensive_plugin_mobius/main/bh3/group_bh3/group_template.json"
+    url = "https://fastly.jsdelivr.net/gh/MobiusT/zhenxun_extensive_plugin_mobius@main/bh3/group_bh3/group_template.json"
     data = await AsyncHttpx.get(url)
     data = json.loads(data.text)
     return data
