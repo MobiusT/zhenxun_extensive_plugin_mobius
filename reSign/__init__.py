@@ -23,7 +23,7 @@ usage：
 __plugin_des__ = "签退对应人员，可以重新签到"
 __plugin_cmd__ = ["签退[at] [_superuser]"]
 __plugin_type__ = ("常规插件",)
-__plugin_version__ = 0.3
+__plugin_version__ = 0.4
 __plugin_author__ = "mobius"
 __plugin_settings__ = {
     "level": 5,
@@ -47,7 +47,7 @@ async def _(event: GroupMessageEvent, arg: Message = CommandArg()):
     mes = ''
     for qq in ats:
         try:
-            user = await SignGroupUser.get_or_none(group_id=event.group_id, user_qq=qq)
+            user = await SignGroupUser.get_or_none(group_id=str(event.group_id), user_id=str(qq))
             if not user or user.checkin_time_last.date() < datetime.now().date():
                 mes += f'{at(qq)}今日未签到; '
                 continue
