@@ -34,7 +34,7 @@ __plugin_settings__ = {
 
 reSign = on_command("签退", aliases={"reSign", "resign"}, permission=SUPERUSER, priority=15, block=True)
 
-SIGN_TODAY_CARD_PATH = IMAGE_PATH / 'sign' / 'today_card'
+CARD_PATH = IMAGE_PATH / 'sign' / 'today_card'
 
 
 @reSign.handle()
@@ -54,8 +54,9 @@ async def _(event: GroupMessageEvent, arg: Message = CommandArg()):
             user.checkin_count -= 1
             user.checkin_time_last += timedelta(days=-1)
             await user.save()
-            today_card = f'{SIGN_TODAY_CARD_PATH}/{qq}_{event.group_id}_sign_{time.strftime("%Y-%m-%d", time.localtime(time.time()))}.png'
-            my_card = f'{SIGN_TODAY_CARD_PATH}/{qq}_{event.group_id}_view_{time.strftime("%Y-%m-%d", time.localtime(time.time()))}.png'
+            date = time.strftime("%Y-%m-%d", time.localtime(time.time()))
+            today_card = f'{CARD_PATH}/{qq}_{event.group_id}_sign_{date}.png'
+            my_card = f'{CARD_PATH}/{qq}_{event.group_id}_view_{date}.png'
             try:
                 os.remove(today_card)
                 os.remove(my_card)
