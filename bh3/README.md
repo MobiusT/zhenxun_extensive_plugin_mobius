@@ -94,6 +94,10 @@
 
 ## 更新
 
+### 2023/04/23[崩坏三绑定](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/bh3/bind_bh3) [v0.3]
+
+1. 优化代码
+
 ### 2023/04/21
 
 1. 猜语音、崩三阵容插件适配羽兔及普罗米修斯
