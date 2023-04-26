@@ -1,7 +1,7 @@
 import re
 
 from nonebot import on_command
-from nonebot.adapters.onebot.v11 import Bot, MessageEvent, Message
+from nonebot.adapters.onebot.v11 import MessageEvent, Message
 
 __zx_plugin_name__ = "echo"
 __plugin_usage__ = """
@@ -31,10 +31,8 @@ echo = on_command("echo", priority=5, block=True)
 
 
 @echo.handle()
-async def _(bot: Bot, event: MessageEvent):
-    if reply := re.search(r"\[CQ:reply,id=(-?\d*)]", event.raw_message):
-        rplymsg = await bot.get_msg(message_id=int(reply[1]))
-        await echo.finish(Message(rplymsg["message"]))
-    cmd_str = re.compile(r"^echo")  # 去掉命令后回复
-    if msg := cmd_str.sub('', event.raw_message):
+async def _(event: MessageEvent):
+    if event.reply:
+        await echo.finish(event.reply.message)
+    if msg := re.sub(r"^echo", '', event.raw_message):  # 去掉命令后回复
         await echo.send(Message(msg))
