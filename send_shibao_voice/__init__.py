@@ -43,7 +43,7 @@ async def _(event: MessageEvent):
         voice = random.choice(os.listdir(RECORD_PATH))
         result = record(f"{RECORD_PATH}/{voice}")
         await dg_voice.send(result)
-        await dg_voice.send(image(f'{IMAGE_PATH}/{voice.split(".")[0]}.jpg'))
+        await dg_voice.send(image(f'{IMAGE_PATH}/{voice.split("_")[1]}.jpg'))
         logger.info(
             f"(USER {event.user_id}, GROUP "
             f"{event.group_id if isinstance(event, GroupMessageEvent) else 'private'}) 发送识宝骂人:"
