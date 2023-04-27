@@ -1,19 +1,12 @@
-'''
-Author: MobiusT
-Date: 2023-01-20 18:51:43
-LastEditors: MobiusT
-LastEditTime: 2023-03-05 21:14:13
-'''
-from nonebot import on_command
-from nonebot.adapters.onebot.v11 import GROUP, Bot, GroupMessageEvent, Message
-from nonebot.params import CommandArg
-from nonebot.log import logger
-from utils.http_utils import AsyncHttpx
-from configs.config import Config
-from models.bag_user import BagUser
 import json
 
+from nonebot import on_command
+from nonebot.adapters.onebot.v11 import GROUP, Bot, GroupMessageEvent, Message
+from nonebot.log import logger
+from nonebot.params import CommandArg
 
+from models.bag_user import BagUser
+from utils.http_utils import AsyncHttpx
 
 __zx_plugin_name__ = "猜谜语"
 __plugin_usage__ = """
@@ -31,7 +24,7 @@ __plugin_cmd__ = [
     "结束猜谜语",
 ]
 __plugin_type__ = ("群内小游戏",)
-__plugin_version__ = 0.1
+__plugin_version__ = 0.2
 __plugin_author__ = "Mobius"
 __plugin_settings__ = {
     "level": 5,
@@ -57,8 +50,7 @@ question = {}
 @start.handle()
 async def _(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
     global answer, question
-    msg = arg.extract_plain_text().strip()
-    if msg:
+    if arg.extract_plain_text().strip():
         return
     if event.group_id in answer:
         if answer[event.group_id]:
@@ -71,32 +63,29 @@ async def _(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
 @submit.handle()
 async def _(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
     global answer
-    if event.group_id in answer:
-        if answer[event.group_id]:
-            msg = arg.extract_plain_text().strip()
-            bounce = 100
-            if not msg:
-                await bot.send(event,
-                               "答案呢?",
-                               at_sender=True)
-            elif msg not in answer[event.group_id]:
-                await bot.send(event,
-                               "答案不对!",
-                               at_sender=True)
-            else:
-                await BagUser.add_gold(event.user_id, event.group_id, bounce)
-                await bot.send(event,
-                               f"答案是{answer[event.group_id]}恭喜你回答正确,奖励你{bounce}金币!",
-                               at_sender=True)
-                del answer[event.group_id]
+    if event.group_id in answer and answer[event.group_id]:
+        msg = arg.extract_plain_text().strip()
+        if not msg:
+            await bot.send(event,
+                           "答案呢?",
+                           at_sender=True)
+        elif msg not in answer[event.group_id]:
+            await bot.send(event,
+                           "答案不对!",
+                           at_sender=True)
         else:
-            await bot.send(event, "现在没有开局哦,请输入猜谜语来开始游戏!")
+            bounce = 100
+            await BagUser.add_gold(event.user_id, event.group_id, bounce)
+            await bot.send(event,
+                           f"答案是{answer[event.group_id]}恭喜你回答正确,奖励你{bounce}金币!",
+                           at_sender=True)
+            del answer[event.group_id]
     else:
         await bot.send(event, "现在没有开局哦,请输入猜谜语来开始游戏!")
 
 
 @stop_game.handle()
-async def _(bot: Bot, event: GroupMessageEvent):
+async def _(event: GroupMessageEvent):
     global answer
     if event.group_id in answer:
         if answer[event.group_id]:
@@ -106,8 +95,11 @@ async def _(bot: Bot, event: GroupMessageEvent):
     else:
         await submit.send("当前没有正在进行的猜谜语游戏哦!")
 
+
 async def random_question():
-    res = await AsyncHttpx.get(f"https://v.api.aa1.cn/api/api-miyu/index.php", timeout=30)
+    res = await AsyncHttpx.get(
+        "https://v.api.aa1.cn/api/api-miyu/index.php", timeout=30
+    )
     res.encoding = "utf8"
     data = json.loads(res.text)
     if data["code"] != "1":
