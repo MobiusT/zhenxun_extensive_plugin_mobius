@@ -5,50 +5,51 @@ from datetime import datetime, timedelta
 from shutil import copy
 
 from apscheduler.triggers.date import DateTrigger
-from utils.utils import get_bot,  scheduler
 from nonebot.adapters.onebot.v11 import MessageSegment
+
 from services.log import logger
+from utils.utils import get_bot, scheduler
 
-
-# from apscheduler.schedulers.asyncio import AsyncIOScheduler
-# scheduler = AsyncIOScheduler()
 game_record = {}
-
 
 
 class GameSession:
     @staticmethod
-    def __load__(file: str = "record.json"):
-        file = os.path.join(os.path.dirname(__file__), file)
-        if not os.path.exists(file):
-            if file.endswith("record.json"):
-                with open(file, "w", encoding="utf8") as f:
+    def __load__(_file: str = "record.json"):
+        _file = os.path.join(os.path.dirname(__file__), _file)
+        if not os.path.exists(_file):
+            if _file.endswith("record.json"):
+                with open(_file, "w", encoding="utf8") as f:
                     f.write("{}")
-            elif file.endswith("answer.json"):
+            elif _file.endswith("answer.json"):
                 copy(
                     os.path.join(os.path.dirname(__file__), "answer_template.json"),
-                    file,
+                    _file,
                 )
-        with open(file, "r", encoding="utf8") as li:
+        with open(_file, "r", encoding="utf8") as li:
             data = json.load(li)
         return data
 
     def __init__(self, gid: int) -> None:
+        self.voice = None
+        self.chara = None
+        self.end = None
+        self.begin = None
         self.group_id = gid
         self.record = game_record.get(self.group_id, {})
         self.job_id = f"{self.group_id}_bh3_guess_voice"
         self.voice_list = self.__load__()
 
-    async def start(self, duration: int = 30, difficulty: str = "normal")-> MessageSegment or str:
+    async def start(self, duration: int = 30, difficulty: str = "normal") -> MessageSegment or str:
         """difficulty:  normal|hard"""
         if self.is_start:
-            return f"游戏正在进行中"
+            return "游戏正在进行中"
         self.begin = datetime.now()
         self.end = self.begin + timedelta(seconds=duration)
         try:
             self.chara, vlist = random.choice(list(self.voice_list[difficulty].items()))
         except KeyError:
-            return f"语音列表未生成或有错误，请先发送‘更新崩坏3语音列表’来更新"
+            return "语音列表未生成或有错误，请先发送‘更新崩坏3语音列表’来更新"
         self.voice = random.choice(vlist)
         game_record.update(
             {self.group_id: {"chara": self.chara, "voice": self.voice, "ok": -1}}
@@ -63,14 +64,14 @@ class GameSession:
             coalesce=True,
             max_instances=1,
         )
-        record_path = f"file:///{os.path.join(os.path.dirname(os.path.dirname(__file__)),'assets/record',self.voice['voice_path'])}"
+        r_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets/record', self.voice['voice_path'])
+        record_path = f"file:///{r_file}"
         logger.info(f'猜语音答案：{self.answer}')
         bot = get_bot()
         await bot.send_group_msg(
             group_id=self.group_id, message=f"即将发送一段崩坏3语音，将在{duration}s后公布答案。"
         )
-        rs = MessageSegment.record(record_path)
-        return rs
+        return MessageSegment.record(record_path)
 
     @property
     def answer(self) -> list:
@@ -81,7 +82,7 @@ class GameSession:
     @property
     def is_start(self):
         self.record = game_record.get(self.group_id, {})
-        return bool(self.record != {})
+        return self.record != {}
 
     async def stop(self):
         self.record = game_record.get(self.group_id)
