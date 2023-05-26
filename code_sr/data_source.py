@@ -17,7 +17,7 @@ async def get_data(url_type, data: Dict = None) -> Dict:
     if data is None:
         data = {}
     url = {
-        "actId": "https://bbs-api.mihoyo.com/painter/api/user_instant/list?offset=0&size=20&uid=73565430",  # 爱酱小跟班
+        "actId": "https://bbs-api.mihoyo.com/painter/api/user_instant/list?offset=0&size=20&uid=288909600",  # 崩坏星穹铁道
         "index": "https://api-takumi.mihoyo.com/event/miyolive/index",
         "code": "https://api-takumi-static.mihoyo.com/event/miyolive/refreshCode"
     }
@@ -52,7 +52,7 @@ async def get_actid() -> str:
         return ""
 
     act_id = ""
-    keywords = ["《崩坏3》", "特别节目"]
+    keywords = ["特别节目"]
     for p in ret["data"]["list"]:
         post = p.get("post", {}).get("post", {})
         if not post:
@@ -97,28 +97,6 @@ async def get_live_data(act_id: str) -> Dict:
     return live_data
 
 
-async def get_week_code() -> str:
-    """获取 ``act_id``"""
-    ret = await get_data("actId")
-    if ret.get("error") or ret.get("retcode") != 0:
-        return ""
-    code = ""
-    keywords = ["本周福利礼包掉落"]
-    for p in ret["data"]["list"]:
-        post = p.get("post", {}).get("post", {})
-        if not post:
-            continue
-        if any(word not in post["content"] for word in keywords):
-            continue
-        shit = json.loads(post["structured_content"])
-        for segment in shit:
-            if isinstance(segment.get("insert", ""), str) and "\n★叮" in segment.get("insert", ""):
-                code = f'★{segment.get("insert").split("★叮")[1]}'
-        if code:
-            break
-    return code
-
-
 async def get_codes(version: str, act_id: str) -> Union[Dict, List[Dict]]:
     """获取兑换码"""
     ret = await get_data("code", {"version": version, "actId": act_id})
@@ -149,7 +127,7 @@ async def get_msg(bot: Bot) -> List[MessageSegment]:
         return [
             MessageSegment.node_custom(
                 user_id=int(bot.self_id),
-                nickname="崩坏三前瞻直播",
+                nickname="星穹铁道前瞻直播",
                 content=Message(MessageSegment.text("暂无前瞻直播资讯！")),
             )
         ]
@@ -159,7 +137,7 @@ async def get_msg(bot: Bot) -> List[MessageSegment]:
         return [
             MessageSegment.node_custom(
                 user_id=int(bot.self_id),
-                nickname="崩坏三前瞻直播",
+                nickname="星穹铁道前瞻直播",
                 content=Message(MessageSegment.text(live_data["error"])),
             )
         ]
