@@ -1,9 +1,3 @@
-<!--
- * @Author: MobiusT
- * @Date: 2023-02-25 19:14:10
- * @LastEditors: MobiusT
- * @LastEditTime: 2023-04-21 23:24:22
--->
 # bh3
 
 崩坏三相关插件
@@ -93,6 +87,11 @@
 </details>
 
 ## 更新
+
+### 2023/05/26[崩坏三兑换码](https://github.com/MobiusT/zhenxun_extensive_plugin_mobius/tree/main/bh3/code_bh3) [v0.2]
+
+1. 优化代码
+2. 升级兑换码获取流程 [代码参考](https://github.com/monsterxcn/nonebot-plugin-gscode/commit/48fddc2c0e41e2140a910de5ed3f61e5765205ba?diff=split)
 
 ### 2023/04/23
 
