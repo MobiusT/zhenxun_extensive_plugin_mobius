@@ -17,6 +17,10 @@
 
 ## 更新
 
+### 2023/05/27
+
+1. 由于官方直播间直接关闭，无法继续获取兑换码，计划于1.2版本直播的时候尝试修复
+
 ### 2023/05/26 [v0.1]
 
 1. 基于[GsCode](https://github.com/monsterxcn/nonebot-plugin-gscode/commit/48fddc2c0e41e2140a910de5ed3f61e5765205ba?diff=split)改写

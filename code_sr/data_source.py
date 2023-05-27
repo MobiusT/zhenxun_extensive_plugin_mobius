@@ -74,8 +74,7 @@ async def get_live_data(act_id: str) -> Dict:
 
     ret = await get_data("index", {"actId": act_id})
     if ret.get("error") or ret.get("retcode") != 0:
-        return {"error": ret.get("error") or "前瞻直播数据异常"}
-
+        return {"error": ret.get("error") or ret.get("message") or "前瞻直播数据异常"}
     live_data_raw = ret["data"]["live"]
     live_template = json.loads(ret["data"]["template"])
     live_data = {
