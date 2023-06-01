@@ -1,11 +1,18 @@
+import hashlib
+import json
+import os
+import re
+import time
+
+import httpx
 import nonebot
 from nonebot import on_command, Driver
 from nonebot.adapters.onebot.v11 import MessageEvent, Message
 from nonebot.message import event_preprocessor
 from nonebot.params import CommandArg
-from services.log import logger
+
 from configs.config import Config
-import re, time, hashlib, httpx, os, json
+from services.log import logger
 
 __zx_plugin_name__ = "繁中转简中"
 __plugin_usage__ = """
@@ -24,7 +31,7 @@ usage：
 __plugin_des__ = "繁中转简中"
 __plugin_cmd__ = ["簡體"]
 __plugin_type__ = ("常规插件",)
-__plugin_version__ = 0.1
+__plugin_version__ = 0.2
 __plugin_author__ = "mobius"
 __plugin_settings__ = {
     "level": 5,
@@ -34,21 +41,22 @@ __plugin_settings__ = {
 }
 __plugin_configs__ = {
     "APPID": {
-        "value": '', 
-        "help": "http://api.fanyi.baidu.com/获取app_id", 
+        "value": '',
+        "help": "https://api.fanyi.baidu.com/获取app_id",
         "default_value": ''
     },
     "APPSECRET": {
         "value": '',
-        "help": "http://api.fanyi.baidu.com/获取app_secret", 
+        "help": "https://api.fanyi.baidu.com/获取app_secret",
         "default_value": ''
     },
 }
 convert = on_command("輸出簡體", aliases={"輸出簡體字", "輸出簡中", "輸出簡"}, priority=15, block=True)
 update_map = on_command("更新映射", priority=15, block=True)
-MAPJSOM = None
+MAPJSOM = {}
 
 driver: Driver = nonebot.get_driver()
+
 
 @driver.on_startup
 async def _():
@@ -56,7 +64,7 @@ async def _():
     MAPJSOM = load_data()
 
 
-#消息拦截
+# 消息拦截
 @event_preprocessor
 async def handle(event: MessageEvent):
     msgs = event.get_message()
@@ -66,76 +74,88 @@ async def handle(event: MessageEvent):
     if not msg:
         return
     try:
-        cmdStr=re.compile(r"^(簡體字|簡體|簡中|簡)")#去掉命令头
-        if cmdStr.search(msg):
-            msg=cmdStr.sub('', msg)  
+        cmd_str = re.compile(r"^(簡體字|簡體|簡中|簡)")  # 去掉命令头
+        if cmd_str.search(msg):
+            msg = cmd_str.sub('', msg)
             try:
-                #调用api
-                msg = await convertStr(msg)   
+                # 调用api
+                msg = await convert_str(msg)
                 event.message[0].data["text"] = msg
-                logger.info("繁中转简中: " + msg)
+                logger.info(f"繁中转简中: {msg}")
             except Exception as e:
                 logger.error(str(e))
                 return
     except:
         return
 
+
 @convert.handle()
-async def _(event: MessageEvent, arg: Message = CommandArg()):
-    #获取需要翻译的文字
-    text=arg.extract_plain_text().strip()   
+async def _(arg: Message = CommandArg()):
+    # 获取需要翻译的文字
+    text = arg.extract_plain_text().strip()
     if not text:
-        return   
+        return
     try:
-        #调用api
-        msg = await convertStr(text)   
+        # 调用api
+        msg = await convert_str(text)
+        await convert.send(msg)
     except Exception as e:
         logger.error(str(e))
-        await convert.finish(str(e))        
-    await convert.send(msg)
+        await convert.finish(str(e))
+
 
 @update_map.handle()
-async def _(event: MessageEvent, arg: Message = CommandArg()):
+async def _():
     global MAPJSOM
-    MAPJSOM = load_data()
-    if MAPJSOM:        
+    if MAPJSOM := load_data():
         await update_map.finish("更新完成")
     await update_map.finish("更新失败，map.json文件不存在或无法解析。")
 
-async def convertStr(text: str) -> str:
+
+async def convert_str(text: str) -> str:
     global MAPJSOM
-    #读取密钥配置
+    # 读取密钥配置
     app_id = Config.get_config("traditional2simplified", "APPID")
     app_secret = Config.get_config("traditional2simplified", "APPSECRET")
+    await check_config(app_id, app_secret)
+    try:
+        _map = await get_map(text)
+        # 调用api
+        msg = await translate(text, app_id, app_secret, "cht", "zh")
+        if _map:
+            for key in _map:
+                for index in _map[key]:
+                    if msg[index:index + 1] == MAPJSOM[key][:1]:
+                        msg = msg[:index] + MAPJSOM[key][1:] + msg[index + 1:]
+        return msg
+    except Exception as e:
+        msg = f'转换出错{type(e)}：{e}'
+        logger.error(msg)
+        raise Exception(msg) from e
+
+
+async def get_map(text):
+    global MAPJSOM
+    _map = {}
+    if MAPJSOM:
+        for key in MAPJSOM:
+            if positions := get_index(text, key):
+                _map[key] = positions
+    return _map
+
+
+async def check_config(app_id, app_secret):
     if not app_id:
-        msg='未配置app_id, 请前往http://api.fanyi.baidu.com/获取'
+        msg = '未配置app_id, 请前往https://api.fanyi.baidu.com/获取'
         logger.error(msg)
         raise Exception(msg)
     elif not app_secret:
-        msg='未配置app_secret, 请前往http://api.fanyi.baidu.com/获取'
-        logger.error(msg)
-        raise Exception(msg)
-    try:
-        map={}
-        if MAPJSOM:
-            for key in MAPJSOM:
-                positions=getIndex(text, key)
-                if positions:
-                    map[key]=positions
-        #调用api
-        msg = await translate(text, app_id, app_secret, "cht", "zh")      
-        if map:
-            for key in map:
-                for index in map[key]:
-                    if msg[index:index+1] == MAPJSOM[key][:1]:
-                        msg = msg[:index] + MAPJSOM[key][1:] + msg[index+1:]
-        return msg
-    except Exception as e:
-        msg=f'转换出错{type(e)}：{e}'
+        msg = '未配置app_secret, 请前往https://api.fanyi.baidu.com/获取'
         logger.error(msg)
         raise Exception(msg)
 
-def getIndex(msg: str, key: str):
+
+def get_index(msg: str, key: str):
     # 查找字符"o"的位置
     pos = msg.find(key)
     # 获取字符"o"在字符串中出现的所有位置
@@ -167,15 +187,16 @@ async def translate(text: str, appid: str, apikey: str, lang_from: str = "auto",
     except Exception:
         return str(result)
 
-#反序列化排行文件
+
+# 反序列化排行文件
 def load_data():
-    file = os.path.join(os.path.dirname(__file__), "./map.json")
-    if not os.path.exists(file):
-        return
-    with open(file, "r", encoding="utf8") as f:
+    _file = os.path.join(os.path.dirname(__file__), "./map.json")
+    if not os.path.exists(_file):
+        return {}
+    with open(_file, "r", encoding="utf8") as f:
         try:
             data: dict = json.load(f)
             return data
         except:
             logger.warning("map文件无法解析")
-            return
+            return {}
